@@ -1,0 +1,5 @@
+Term of the Agreement for the Alfresco software distribution within CIRCABC.
+
+Alfresco Company grants the usage of its Alfresco Enterprise edition solely as integrated with the CIRCABC application under the terms of the European Union Public License v1.1. 
+This is in addition to the rights and obligations previously set forth in the License.
+

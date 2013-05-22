@@ -1,0 +1,242 @@
+<?xml version='1.0' encoding='UTF-8'?>
+
+<!--+
+    |     Copyright European Community 2006 - Licensed under the EUPL V.1.0
+    |
+    |  		   http://ec.europa.eu/idabc/en/document/6523
+    |
+    +-->
+
+<ehcache>
+    <!-- defaults -->
+    <diskStore
+        path="java.io.tmpdir"/>
+
+        <!--
+        Predefined caches.
+		Add your cache configuration settings here.
+
+		If you do not have a configuration for your cache a WARNING will be issued when the
+		CacheManager starts
+
+		The following attributes are required:
+		name                           - Sets the name of the cache. This is used to identify the cache.
+										 It must be unique.
+
+		maxInMemory                    - Sets the maximum number of objects that will be created in memory
+		eternal                        - Sets whether elements are eternal. If eternal,  timeouts are ignored and the
+		element is never expired.
+
+		overflowToDisk                 - Sets whether elements can overflow to disk when the in-memory cache
+										 has reached the maxInMemory limit.
+
+		The following attributes are optional:
+		timeToIdleSeconds              - Sets the time to idle for an element before it expires.
+										 i.e. The maximum amount of time between accesses before an element expires
+										 Is only used if the element is not eternal.
+										 Optional attribute. A value of 0 means that an Element can idle for infinity.
+										 The default value is 0.
+
+		timeToLiveSeconds              - Sets the time to live for an element before it expires.
+										 i.e. The maximum time between creation time and when an element expires.
+										 Is only used if the element is not eternal.
+										 Optional attribute. A value of 0 means that and Element can live for infinity.
+										 The default value is 0.
+
+		diskPersistent                 - Whether the disk store persists between restarts of the Virtual Machine.
+										 The default value is false.
+
+		diskExpiryThreadIntervalSeconds- The number of seconds between runs of the disk expiry thread. The default value
+										 is 120 seconds.
+		-->
+
+    <!--
+       The 'heartbeatInterval' property is the only one used for the JGroups-enabled implementation
+    -->
+    <cacheManagerPeerProviderFactory
+        class="net.sf.ehcache.distribution.RMICacheManagerPeerProviderFactory"
+        properties="peerDiscovery=automatic,
+                    multicastGroupAddress=239.16.1.3,
+                    multicastGroupPort=9000"
+    />
+
+    <cacheManagerPeerListenerFactory
+        class="net.sf.ehcache.distribution.RMICacheManagerPeerListenerFactory"
+        properties="port=8999, socketTimeoutMillis=120000"/>
+
+	<defaultCache
+        maxElementsInMemory="5000"
+        eternal="false"
+        timeToIdleSeconds="15"
+        timeToLiveSeconds="15"
+        overflowToDisk="false"
+        >
+        <cacheEventListenerFactory
+                class="net.sf.ehcache.distribution.RMICacheReplicatorFactory"
+                properties="replicateAsynchronously=false,
+                            replicatePuts=false,
+                            replicateUpdates=true,
+                            replicateUpdatesViaCopy=false,
+                            replicateRemovals=true"/>
+
+    </defaultCache>
+
+	<cache
+        name="org.alfresco.dynamic.authority.lockOwnerDynamicAuthority"
+        maxElementsInMemory="500"
+        eternal="false"
+        timeToLiveSeconds="2"
+        overflowToDisk="false"
+        >
+
+            <cacheEventListenerFactory
+                    class="net.sf.ehcache.distribution.RMICacheReplicatorFactory"
+                    properties="replicateAsynchronously = false
+                                replicatePuts = false,
+                                replicateUpdates = true,
+                                replicateUpdatesViaCopy = false,
+                                replicateRemovals = true
+                                "/>
+    </cache>
+
+	<cache
+        name="org.alfresco.dynamic.authority.ownerDynamicAuthority"
+        maxElementsInMemory="500"
+        eternal="false"
+        timeToLiveSeconds="2"
+        overflowToDisk="false"
+        >
+
+            <cacheEventListenerFactory
+                    class="net.sf.ehcache.distribution.RMICacheReplicatorFactory"
+                    properties="replicateAsynchronously = false
+                                replicatePuts = false,
+                                replicateUpdates = true,
+                                replicateUpdatesViaCopy = false,
+                                replicateRemovals = true
+                                "/>
+    </cache>
+
+    <cache
+        name="eu.cec.digit.circabc.service.dynamic.authority.circabcDynamicAuthority"
+        maxElementsInMemory="50000"
+        eternal="false"
+        timeToLiveSeconds="15"
+        overflowToDisk="false"
+>
+            <cacheEventListenerFactory
+                    class="net.sf.ehcache.distribution.RMICacheReplicatorFactory"
+                    properties="replicateAsynchronously = false
+                                replicatePuts = false,
+                                replicateUpdates = true,
+                                replicateUpdatesViaCopy = false,
+                                replicateRemovals = true
+                                "/>
+    </cache>
+
+	<!--
+
+    <cache
+        name="eu.cec.digit.circabc.service.dynamic.authority.informationDynamicAuthority"
+        maxElementsInMemory="50000"
+        eternal="false"
+        timeToLiveSeconds="15"
+        overflowToDisk="false"
+        >
+            <cacheEventListenerFactory
+                    class="net.sf.ehcache.distribution.RMICacheReplicatorFactory"
+                    properties="replicateAsynchronously = false
+                                replicatePuts = false,
+                                replicateUpdates = true,
+                                replicateUpdatesViaCopy = false,
+                                replicateRemovals = true
+                                "/>
+    </cache>
+
+    <cache
+        name="eu.cec.digit.circabc.service.dynamic.authority.libraryDynamicAuthority"
+        maxElementsInMemory="50000"
+        eternal="false"
+        timeToLiveSeconds="15"
+        overflowToDisk="false"
+        >
+            <cacheEventListenerFactory
+                    class="net.sf.ehcache.distribution.RMICacheReplicatorFactory"
+                    properties="replicateAsynchronously = false
+                                replicatePuts = false,
+                                replicateUpdates = true,
+                                replicateUpdatesViaCopy = false,
+                                replicateRemovals = true
+                                "/>
+    </cache>
+
+    <cache
+        name="eu.cec.digit.circabc.service.dynamic.authority.directoryDynamicAuthority"
+        maxElementsInMemory="50000"
+        eternal="false"
+        timeToLiveSeconds="15"
+        overflowToDisk="false"
+        >
+            <cacheEventListenerFactory
+                    class="net.sf.ehcache.distribution.RMICacheReplicatorFactory"
+                    properties="replicateAsynchronously = false
+                                replicatePuts = false,
+                                replicateUpdates = true,
+                                replicateUpdatesViaCopy = false,
+                                replicateRemovals = true
+                                "/>
+    </cache>
+
+    <cache
+        name="eu.cec.digit.circabc.service.dynamic.authority.newsgroupDynamicAuthority"
+        maxElementsInMemory="50000"
+        eternal="false"
+        timeToLiveSeconds="15"
+        overflowToDisk="false"
+        >
+            <cacheEventListenerFactory
+                    class="net.sf.ehcache.distribution.RMICacheReplicatorFactory"
+                    properties="replicateAsynchronously = false
+                                replicatePuts = false,
+                                replicateUpdates = true,
+                                replicateUpdatesViaCopy = false,
+                                replicateRemovals = true
+                                "/>
+    </cache>
+
+	<cache
+        name="eu.cec.digit.circabc.service.dynamic.authority.eventDynamicAuthority"
+        maxElementsInMemory="50000"
+        eternal="false"
+        timeToLiveSeconds="15"
+        overflowToDisk="false"
+        >
+            <cacheEventListenerFactory
+                    class="net.sf.ehcache.distribution.RMICacheReplicatorFactory"
+                    properties="replicateAsynchronously = false
+                                replicatePuts = false,
+                                replicateUpdates = true,
+                                replicateUpdatesViaCopy = false,
+                                replicateRemovals = true
+                                "/>
+    </cache>
+
+	<cache
+        name="eu.cec.digit.circabc.service.dynamic.authority.categoryDynamicAuthority"
+        maxElementsInMemory="50000"
+        eternal="false"
+        timeToLiveSeconds="15"
+        overflowToDisk="false"
+        >
+            <cacheEventListenerFactory
+                    class="net.sf.ehcache.distribution.RMICacheReplicatorFactory"
+                    properties="replicateAsynchronously = false
+                                replicatePuts = false,
+                                replicateUpdates = true,
+                                replicateUpdatesViaCopy = false,
+                                replicateRemovals = true
+                                "/>
+    </cache>
+    -->
+
+</ehcache>

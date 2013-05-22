@@ -1,0 +1,229 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE beans PUBLIC '-//SPRING//DTD BEAN//EN' 'http://www.springframework.org/dtd/spring-beans-2.0.dtd'>
+
+<!--+
+    |     Copyright European Community 2006 - Licensed under the EUPL V.1.0
+    |
+    |  		   http://ec.europa.eu/idabc/en/document/6523
+    |
+    +-->
+
+<!-- ===================================================================  -->
+<!-- This file contains the bean definitions that support authentication  -->
+<!-- ===================================================================  -->
+
+<!--                                                                        -->
+<!-- Acegi is used for authentication and protecting method calls on public -->
+<!-- services. To do this requires our authentication mechanism to work     -->
+<!-- within the acegi framework.                                            -->
+<!--                                                                        -->
+<!-- It is important to decide if user names are case sensitive or not.     -->
+<!-- This is configured in repository.properties.                           -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- TODO:                                                                  -->
+<!--                                                                        -->
+<!-- The transactional wrappers should be removed from the beans in this    -->
+<!-- file. This should be done in the public services definitions.          -->
+<!-- This requires some tests to be fixed up.                               -->
+<!--                                                                        -->
+
+
+<beans>
+    <!--                                                                    -->
+    <!-- The Acegi authentication manager.                                  -->
+    <!--                                                                    -->
+    <!-- Provders are asked to authenticate in order.                       -->
+    <!-- First, is a provider that checks if an acegi authentication object -->
+    <!-- is already bound to the executing thread. If it is, and it is set  -->
+    <!-- as authenticated then no further authentication is required. If    -->
+    <!-- this is absent, Acegi validates the password for every method      -->
+    <!-- invocation, which is too CPU expensive. If we set an               -->
+    <!-- authentication based on a ticket etc .... or we want to set the    -->
+    <!-- the system user as the current user ... we do not have the         -->
+    <!-- password. So if we have set an authentication and set it as        -->
+    <!-- authenticated that is sufficient to validate the user.             -->
+    <!--                                                                    -->
+    <!-- If the authentication bound to the current thread is not set as    -->
+    <!-- authenticated the standard Acegi DAO Authentication provider       -->
+    <!-- is used to authenticate.                                           -->
+    <!--                                                                    -->
+
+    <!-- We provide a DAO to plug into the Acegi DaoAuthenticationProvider  -->
+
+    <!-- An authentication Provider that just believes authentications      -->
+    <!-- bound to the local thread are valid if they are set as             -->
+    <!-- authenticated.                                                     -->
+
+
+    <!-- The authroity DAO implements an interface extended from the Acegi  -->
+    <!-- DAO that supports CRUD.                                            -->
+
+    <!-- The DAO also acts as a salt provider.                              -->
+
+    <!-- Passwords are encoded using MD4                                    -->
+    <!-- This is not ideal and only done to be compatible with NTLM         -->
+    <!-- authentication against the default authentication mechanism.       -->
+
+    <!-- The Authentication Service implementation.                         -->
+    <!--                                                                    -->
+    <!-- This delegates its work to two services:                           -->
+    <!-- an AuthenticationComponent and a MutableAuthenticationDAO.         -->
+    <!--                                                                    -->
+    <!-- The permissions service is required so that permissions can be     -->
+    <!-- cleaned up when a user is deleted.                                 -->
+
+    <!-- The authentication component.                                      -->
+
+    <!-- Parent bean for beans derived from AbstractAuthenticationComponent -->
+
+    <!-- Copy and comendted for Merge Facilities. Don't remove please
+    <bean id="authenticationComponentBase" abstract="true">
+       <property name="tenantService">
+            <ref bean="tenantService"/>
+        </property>
+    </bean>
+    -->
+    <!-- Copy and comendted for Merge Facilities. Don't remove please
+    <bean id="authenticationComponent"
+          class="org.alfresco.repo.security.authentication.AuthenticationComponentImpl"
+          parent="authenticationComponentBase">
+        <property name="authenticationDao">
+            <ref bean="authenticationDao" />
+        </property>
+        <property name="authenticationManager">
+            <ref bean="authenticationManager" />
+        </property>
+        <property name="allowGuestLogin">
+            <value>true</value>
+        </property>
+        <property name="nodeService">
+            <ref bean="nodeService" />
+        </property>
+        <property name="personService">
+            <ref bean="personService" />
+        </property>
+        <property name="transactionService">
+            <ref bean="transactionService" />
+        </property>
+    </bean>
+    -->
+
+    <!-- Simple Authentication component that rejects all authentication requests -->
+    <!-- Use this defintion for Novell IChain integration.                        -->
+    <!-- It should never go to the login screen  so this is not required          -->
+
+    <!-- Copy and comendted for Merge Facilities. Don't remove please
+    <bean id="authenticationComponent"
+          class="org.alfresco.repo.security.authentication.SimpleAcceptOrRejectAllAuthenticationComponentImpl"
+          parent="authenticationComponentBase">
+        <property name="accept">
+            <value>true</value>
+        </property>
+        </property>
+        <property name="nodeService">
+            <ref bean="nodeService" />
+        </property>
+        <property name="personService">
+            <ref bean="personService" />
+        </property>
+        <property name="transactionService">
+            <ref bean="transactionService" />
+        </property>
+    </bean>
+    -->
+
+
+    <!-- The person service.                                                -->
+
+    <bean id="personService" class="org.alfresco.repo.security.person.PersonServiceImpl" init-method="init">
+		<property name="transactionService">
+            <ref bean="transactionService" />
+        </property>
+        <property name="nodeService">
+            <ref bean="nodeService" />
+        </property>
+        <property name="tenantService">
+            <ref bean="tenantService"/>
+        </property>
+        <property name="searchService">
+            <ref bean="admSearchService" />
+        </property>
+        <property name="permissionServiceSPI">
+            <ref bean="permissionServiceImpl" />
+        </property>
+        <property name="authorityService">
+           <ref bean="authorityService" />
+        </property>
+        <property name="authenticationService">
+           <ref bean="authenticationService" />
+        </property>
+        <property name="dictionaryService">
+           <ref bean="dictionaryService" />
+        </property>
+        <property name="namespacePrefixResolver">
+            <ref bean="namespaceService" />
+        </property>
+        <property name="policyComponent">
+            <ref bean="policyComponent"/>
+        </property>
+        <property name="personCache">
+            <ref bean="personCache" />
+        </property>
+		<property name="permissionsManager">
+            <ref bean="personServicePermissionsManager" />
+        </property>
+		<property name="aclDAO">
+			<ref bean="aclDAO" />
+		</property>
+        <property name="homeFolderManager">
+            <ref bean="HomeFolderManager" />
+        </property>
+        <property name="homeFolderCreationEager">
+            <value>${home.folder.creation.eager}</value>
+        </property>
+        <!-- Configurable properties.                                 -->
+        <!--                                                          -->
+        <!-- TODO:                                                    -->
+        <!-- Add support for creating real home spaces adn setting    -->
+        <!-- permissions on the hame space and people created.        -->
+        <!--                                                          -->
+        <!-- The store in which people are persisted.                 -->
+        <property name="storeUrl">
+           <value>${spaces.store}</value>
+        </property>
+        <!-- Some authentication mechanisms may need to create people -->
+        <!-- in the repository on demand. This enables that feature.  -->
+        <!-- If dsiabled an error will be generated for missing       -->
+        <!-- people. If enabled then a person will be created and     -->
+        <!-- persisted.                                               -->
+        <!-- Valid values are                                         -->
+        <!--     ${server.transaction.allow-writes}                   -->
+        <!--     false                                                -->
+        <property name="createMissingPeople">
+            <value>false</value>
+        </property>
+        <property name="userNameMatcher">
+           <ref bean="userNameMatcher" />
+        </property>
+        <!-- New properties after 1.4.0 to deal with duplicate user ids when found -->
+        <property name="processDuplicates">
+            <value>true</value>
+        </property>
+        <!-- one of:  LEAVE, SPLIT, DELETE -->
+        <property name="duplicateMode">
+            <value>DELETE</value>
+        </property>
+        <property name="lastIsBest">
+            <value>true</value>
+        </property>
+        <property name="includeAutoCreated">
+            <value>false</value>
+        </property>
+    </bean>
+    
+    <bean id="passwordEncoder" class="eu.cec.digit.circabc.repo.security.authentication.CircabcPasswordEncoderImpl"></bean>
+
+    <!-- The ticket component.                                              -->
+    <!-- Used for reauthentication                                          -->
+</beans>

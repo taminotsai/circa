@@ -1,0 +1,117 @@
+<?xml version="1.0"?>
+
+<!--+
+    |     Copyright European Community 2006 - Licensed under the EUPL V.1.0
+    |
+    |		http://ec.europa.eu/idabc/en/document/6523
+    |
+    +-->
+
+<project name="Circabc Build File for Maven 2" basedir=".">
+
+	<path id="svnant.classpath">
+		<fileset dir="../Circabc 3rd Party">
+			<include name="**/*.jar"/>
+		</fileset>
+	</path>
+
+	<macrodef name="delFromZip">  
+		<attribute name="zipFile"/>
+		<element   name="selectors" implicit="true" optional="true"/>
+		<sequential>
+			<mkdir dir="${dir.target.tmp}"/>
+			<unzip dest="${dir.target.tmp}" src="@{zipFile}"/>
+			<delete file="@{zipFile}" verbose="true"/>
+			<delete verbose="true">
+				<fileset dir="${dir.target.tmp}">
+					<selectors/>
+				</fileset>
+			</delete>
+			<zip destfile="@{zipFile}" basedir="${dir.target.tmp}"/>
+			<!--
+			<delete dir="${dir.target.tmp}"/>
+			-->
+		</sequential>
+	</macrodef>
+
+	<property file="build_maven.properties" />
+	<property file="./source/java/alfresco/extension/messages/circabc-version.properties" />
+
+	<!-- load the svn task -->
+	<typedef resource="org/tigris/subversion/svnant/svnantlib.xml" classpathref="svnant.classpath" />
+
+	
+	
+
+
+	<!-- =================================
+			target: zip
+	================================= -->
+	<target name="zip"  description="create amp zip file">
+		<zip destfile="${dir.target}/${war_file}.amp" update="no" >
+			<zipfileset  dir="${dir.target}/${war_file}" prefix="web" excludes="/**/.faces-config.xml.faceside, ${log4j.properties}" />
+			<zipfileset  dir="${dir.target}/WebRoot" excludes="/**/.svn, ${log4j.properties}"/>
+			<fileset dir="${dir.project}" includes="file-mapping.properties" excludes="${log4j.properties}"/>
+			<fileset dir="${dir.project}" includes="module.properties" excludes="${log4j.properties}"/>
+		</zip>
+	</target>
+
+
+	<target name="-update-war" depends="zip">
+
+		<!-- this is a trick: like a depends but name is created dynamicly -->
+		<copy file="${original.alfresco.war}" tofile="${dir.target.circabc.war}" overwrite="true"/>
+
+		<echo>Remove log4j.properties from ${dir.target.circabc.war} (copy of original ${original.alfresco.war})</echo>
+			<delFromZip zipFile="${dir.target.circabc.war}">
+			<include name="@{log4j.properties}" />
+		</delFromZip>
+
+		<echo>Remove log4j.properties from ${dir.target.circabc.war} (copy of original ${original.alfresco.war})</echo>
+
+		<echo>local var ${local.var}</echo>
+
+		<delFromZip zipFile="${dir.target.circabc.war}">
+			<!-- TODO: use the ${log4j.properties} variable  -->
+			<include name="**/log4j.properties"/>
+		</delFromZip>
+
+		<echo>Installing SDK Demo AMP into WAR</echo>
+
+		<!-- property name="build.dir" value="${dir.amp.circabc}_${dir.version}/build/lib"/ -->
+		<path id="class.path">
+			<!--dirset dir="${build.dir}" / -->
+			<dirset dir="../SDK AlfrescoEmbedded/lib" excludes="**/*.svn" includes="**/*.jar" />
+			<filelist	dir="../SDK AlfrescoEmbedded/lib"
+						files="alfresco-repository.jar alfresco-core.jar"/>
+			<filelist dir="../3rd Party/lib" files="truezip.jar spring-2.0.2.jar jug-lgpl-2.0.0.jar"/>
+		</path>
+
+		<java dir="." fork="true" classname="org.alfresco.repo.module.tool.ModuleManagementTool">
+			<classpath refid="class.path" />
+			<!--arg line="install ${dir.target}/${war_file}.amp ../circabc.war -force -nobackup -verbose"/ -->
+			<arg line="install ${dir.target}/${war_file}.amp ${dir.target.circabc.war} -nobackup -force"/>
+		</java>
+	</target>
+
+	<target name="-update-version">
+		<svn username="${svn.username}" password="${svn.password}">
+			<wcVersion path= ".." />
+			<status path= ".." />
+		</svn>
+
+		<echo message= "Subversion revision: ${revision.max}" />
+
+		<propertyfile file="./source/java/alfresco/extension/messages/circabc-version.properties">
+			<entry key="version.major" value="${version.major}" />
+			<entry key="version.minor" value="${version.minor}" />
+			<entry key="version.revision" value="${revision.max}" />
+			<entry key="version.label" value="${version.label}" />
+			<entry key="version.edition" value="${version.edition}" />
+			<entry key="scm.repository.path" value="${repository.path}" />
+			<entry key="build.date" type="date" value="now" pattern="MMM dd yyyy HH:mm:ss"/>
+		</propertyfile>
+  </target>
+
+
+</project>

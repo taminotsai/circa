@@ -1,0 +1,114 @@
+<?xml version='1.0' encoding='UTF-8'?>
+
+<!--+
+    |     Copyright European Community 2006 - Licensed under the EUPL V.1.0
+    |
+    |  		   http://ec.europa.eu/idabc/en/document/6523
+    |
+    +-->
+
+<!DOCTYPE beans PUBLIC '-//SPRING//DTD BEAN//EN' 'http://www.springframework.org/dtd/spring-beans.dtd'>
+
+<beans>
+
+  <!-- Task scheduler -->
+  <!-- Triggers should not appear here - the scheduler should be injected into the trigger definition -->
+  <!-- This bean should not need to apear else where in extension configuration -->
+  <bean id="schedulerFactory" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+      <property name="waitForJobsToCompleteOnShutdown">
+          <value>true</value>
+      </property>
+      <property name="configLocation">
+          <value>classpath:alfresco/extension/domain/quartz.properties</value>
+      </property>
+      <property name="schedulerName">
+          <value>DefaultScheduler</value>
+      </property>
+      <!-- Do not auto start the scheduler - this is done at the end of the bootstrap process -->
+      <property name="autoStartup">
+          <value>false</value>
+      </property>
+  </bean>
+
+    <!--                 -->
+    <!-- Scheduled tasks -->
+    <!--                 -->
+
+    <!-- This has now been moved into the bootstrap process and is not required here -->
+
+    <!-- Change nothing -->
+
+  <!-- Change nothing -->
+  <!-- enable DEBUG for 'org.alfresco.repo.cache.EhCacheTracerJob' and enable scheduler property to activate -->
+  <!-- Change nothing -->
+  <!-- Job to scan for expired content in website staging areas -->
+  <!-- trigger at 3:30am each day -->
+  <!-- There is a job available to purge old deploymentattempt nodes  -->
+  <!-- from the repository. The maximum age of the node can be configured. -->
+  <!-- See the wiki (http://wiki.alfresco.com/wikiDeployment) for details -->
+  <!-- and the deployment-attempt-cleaner-context.xml.sample file. -->
+
+  <!--                                                                         -->
+  <!-- CIRCABC crons                                                           -->
+  <!--                                                                         -->
+
+
+
+<!--
+	"0 0 12 * * ?"  	  	Fire at 12pm (noon) every day
+	"0 15 10 ? * *"  	  	Fire at 10:15am every day
+	"0 15 10 * * ?" 	  	Fire at 10:15am every day
+	"0 15 10 * * ? *" 	  	Fire at 10:15am every day
+	"0 15 10 * * ? 2005" 	  	Fire at 10:15am every day during the year 2005
+	"0 * 14 * * ?" 	  	Fire every minute starting at 2pm and ending at 2:59pm, every day
+	"0 0/5 14 * * ?" 	  	Fire every 5 minutes starting at 2pm and ending at 2:55pm, every day
+	"0 0/5 14,18 * * ?" 	  	Fire every 5 minutes starting at 2pm and ending at 2:55pm, AND fire every 5 minutes starting at 6pm and ending at 6:55pm, every day
+	"0 0-5 14 * * ?" 	  	Fire every minute starting at 2pm and ending at 2:05pm, every day
+	"0 10,44 14 ? 3 WED" 	  	Fire at 2:10pm and at 2:44pm every Wednesday in the month of March.
+	"0 15 10 ? * MON-FRI" 	  	Fire at 10:15am every Monday, Tuesday, Wednesday, Thursday and Friday
+	"0 15 10 15 * ?" 	  	Fire at 10:15am on the 15th day of every month
+	"0 15 10 L * ?" 	  	Fire at 10:15am on the last day of every month
+	"0 15 10 ? * 6L" 	  	Fire at 10:15am on the last Friday of every month
+	"0 15 10 ? * 6L" 	  	Fire at 10:15am on the last Friday of every month
+	"0 15 10 ? * 6L 2002-2005" 	  	Fire at 10:15am on every last friday of every month during the years 2002, 2003, 2004 and 2005
+	"0 15 10 ? * 6#3" 	  	Fire at 10:15am on the third Friday of every month
+-->
+
+
+<!--
+	Cron that listen on meeting response
+	and update repository
+-->
+  <bean id="emailListenersTrigger" class="org.alfresco.util.TriggerBean">
+		<property name="jobDetail">
+			<bean id="emailListenersJobDetail" class="org.springframework.scheduling.quartz.JobDetailBean">
+				<property name="jobClass">
+					<value>eu.cec.digit.circabc.service.event.MeetingResponseListener</value>
+				</property>
+				<property name="jobDataAsMap">
+					<map>
+						<entry key="serviceRegistry">
+							<ref bean="ServiceRegistry" />
+						</entry>
+						<entry key="circabcServiceRegistry">
+							<ref bean="circabcServiceRegistry" />
+						</entry>
+					</map>
+				</property>
+			</bean>
+		</property>
+		<property name="startDelay">
+			<value>60000</value>
+		</property>
+		<property name="repeatInterval">
+			<value>180000</value>
+		</property>
+		<property name="scheduler">
+			<ref bean="schedulerFactory" />
+		</property>
+	</bean>
+
+
+
+
+</beans>

@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='UTF-8'?>
+
+<!--+ | Copyright European Community 2006 - Licensed under the EUPL V.1.0 
+	| | http://ec.europa.eu/idabc/en/document/6523 | + -->
+
+<ehcache>
+	<!-- defaults -->
+	<diskStore path="java.io.tmpdir" />
+
+	<defaultCache maxElementsInMemory="5000" eternal="false"
+		timeToIdleSeconds="15" timeToLiveSeconds="15" overflowToDisk="false">
+	</defaultCache>
+
+	<cache name="org.alfresco.dynamic.authority.lockOwnerDynamicAuthority"
+		maxElementsInMemory="500" eternal="false" timeToLiveSeconds="2"
+		overflowToDisk="false">
+
+	</cache>
+
+	<cache name="org.alfresco.dynamic.authority.ownerDynamicAuthority"
+		maxElementsInMemory="500" eternal="false" timeToLiveSeconds="2"
+		overflowToDisk="false">
+
+	</cache>
+
+	<cache
+		name="eu.cec.digit.circabc.service.dynamic.authority.circabcDynamicAuthority"
+		maxElementsInMemory="50000" eternal="false" timeToLiveSeconds="15"
+		overflowToDisk="false">
+	</cache>
+
+
+
+</ehcache>

@@ -1,0 +1,141 @@
+<?xml version="1.0"?>
+
+<!--+
+    |     Copyright European Community 2006 - Licensed under the EUPL V.1.0
+    |
+    |  		   http://ec.europa.eu/idabc/en/document/6523
+    |
+    +-->
+
+<project name="Circabc Build File for the Community Release" basedir=".">
+
+	<property file="build_oss.properties" />
+
+	<target name="test-distribute">
+		<condition property="distribute-ok">
+			<equals arg1="${distribution}" arg2="true" />
+		</condition>
+	</target>
+
+	<target name="distribute" >
+
+		<!-- Clean the working directory first -->
+		<delete file="${distribution.folder}/${distribution.src.file}.tar"/>
+		<delete file="${distribution.folder}/${distribution.src.file}.tar.gz"/>
+		<delete dir="${distribution.folder}"/>
+
+		<mkdir dir="${distribution.folder}"/>
+		<mkdir dir="${distribution.temp.folder}"/>
+		<mkdir dir="${distribution.temp.folder.sources}"/>
+		<mkdir dir="${distribution.temp.folder.sources}/3rd Party"/>
+		<mkdir dir="${distribution.temp.folder.sources}/automatisation"/>
+		<mkdir dir="${distribution.temp.folder.sources}/CircabcAmp"/>
+		<mkdir dir="${distribution.temp.folder.sources}/language-packs"/>
+		<mkdir dir="${distribution.temp.folder.sources}/SDK AlfrescoEmbedded"/>
+		<mkdir dir="${distribution.temp.folder.sources}/SDK Circa"/>
+		<mkdir dir="${distribution.temp.folder.sources}/CircaToBc"/>
+
+		<!--
+			Create the src tar
+		-->
+
+		<!-- ... get the sources -->
+		<copy todir="${distribution.temp.folder.sources}/SDK Circa/source">
+			<fileset dir="${dir.project}/source" excludes="**/*.svn"/>
+		</copy>
+		<!-- ... get the dependencies -->
+		<copy todir="${distribution.temp.folder.sources}/SDK Circa/dependencies" >
+			<fileset dir="${dir.project}/dependencies" excludes="**/*.svn"/>
+		</copy>
+		<!-- ... get some build config for example -->
+		<copy todir="${distribution.temp.folder.sources}/SDK Circa/buildconfig" >
+			<fileset dir="${dir.project}/buildconfig/oss-distribution/distrib-files/buildconfig" excludes="**/*.svn">
+				<exclude name="*ecas*"/>
+			</fileset>
+		</copy>
+		<!-- ... get some root project files -->
+		<copy todir="${distribution.temp.folder.sources}/SDK Circa" >
+			<fileset dir="${dir.project}" excludes="**/*.svn" >
+				<include name="*.*" />
+				<exclude name=".*" />
+				<exclude name="*guillaume*" />
+				<exclude name="*-moi.*" />
+				<exclude name="*.launch" />
+			</fileset>
+		</copy>
+
+		<!-- ... get the sources for CiracToBc -->
+		<copy todir="${distribution.temp.folder.sources}/CircaToBc/source">
+			<fileset dir="${dir.project.root}/CircaToBc" excludes="**/*.svn"/>
+		</copy>
+		<!-- ... remove the sources related to the migration -->
+		<delete dir="${distribution.temp.folder.sources}/SDK Circa/source/java/eu/cec/digit/circabc/migration"/><!-- Unfortunatelly exists -->
+		<delete dir="${distribution.temp.folder.sources}/SDK Circa/source/migration"/><!-- Should exists -->
+		<!-- ... remove the sources related to the webservices -->
+		<delete dir="${distribution.temp.folder.sources}/SDK Circa/source/generated"/>
+		<mkdir  dir="${distribution.temp.folder.sources}/SDK Circa/source/generated"/>
+
+		<!-- ... get the CircabcAmp project -->
+		<copy todir="${distribution.temp.folder.sources}/CircabcAmp" >
+			<fileset dir="${dir.project.root}/CircabcAmp" excludes="**/*.svn">
+				<exclude name=".*" />
+			</fileset>
+		</copy>
+
+		<!-- ... get the Watir examples -->
+		<copy todir="${distribution.temp.folder.sources}/automatisation" >
+			<fileset dir="${dir.project.root}/automatisation" excludes="**/*.svn">
+				<exclude name=".*" />
+			</fileset>
+		</copy>
+
+		<!-- ... get the root pom.xml -->
+		<copy file="${dir.project.root}/pom.xml" todir="${distribution.temp.folder.sources}"/>
+
+		<!-- ... get divers documents and licences -->
+		<copy todir="${distribution.temp.folder}" >
+			<fileset dir="${dir.project}/buildconfig/oss-distribution/distrib-files/docs" excludes="**/*.svn">
+				<exclude name=".*" />
+			</fileset>
+		</copy>
+		
+
+		<!-- ... create a tar.gz (and delete the temporary tar and folder) -->
+		<tar tarfile="${distribution.folder}/${distribution.src.file}.tar" basedir="${distribution.temp.folder}" excludes="**/*.lic"/>
+		<gzip zipfile="${distribution.folder}/${distribution.src.file}.tar.gz" src="${distribution.folder}/${distribution.src.file}.tar" />
+		<delete file="${distribution.folder}/${distribution.src.file}.tar"/>
+		<delete dir="${distribution.temp.folder}" />
+
+		<!--
+			Create the bin tar
+		-->
+
+		<mkdir dir="${distribution.temp.folder}"/>
+
+		<!-- ... get the circabc.amp -->
+		<copy file="${dir.target}/${war_file}.amp" todir="${distribution.temp.folder}"/>
+		<move file="${distribution.temp.folder}/${war_file}.amp" tofile="${distribution.temp.folder}/circabc.amp"/>
+		
+		<!-- ... get required jars -->
+		<copy file="${dir.project.root}/SDK AlfrescoEmbedded/lib/dependencies/rhino-js-1.6R7.jar" todir="${distribution.temp.folder}"/>
+		<copy file="${dir.project.root}/SDK AlfrescoEmbedded/lib/dependencies/xercesImpl-2.8.0.jar" todir="${distribution.temp.folder}"/>
+		<copy file="${dir.project.root}/alfresco.war" todir="${distribution.temp.folder}"/>
+		
+		<!-- ... get divers documents and licences -->
+		<copy todir="${distribution.temp.folder}" >
+			<fileset dir="${dir.project}/buildconfig/oss-distribution/distrib-files/docs" excludes="**/*.svn">
+				<exclude name=".*" />
+			</fileset>
+		</copy>
+
+		<!-- ... create a tar.gz (and delete the temporary tar and folder) -->
+		<tar tarfile="${distribution.folder}/${distribution.bin.file}.tar" basedir="${distribution.temp.folder}" excludes="**/*.lic"/>
+		<gzip zipfile="${distribution.folder}/${distribution.bin.file}.tar.gz" src="${distribution.folder}/${distribution.bin.file}.tar" />
+		<delete file="${distribution.folder}/${distribution.bin.file}.tar"/>
+		<delete dir="${distribution.temp.folder}" />
+
+
+	</target>
+
+
+</project>

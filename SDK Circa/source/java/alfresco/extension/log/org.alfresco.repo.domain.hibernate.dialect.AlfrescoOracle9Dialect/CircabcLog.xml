@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="CircabcLog">
+
+   <typeAlias alias="LogRecord" type="eu.cec.digit.circabc.repo.log.LogRecordDAO"/>
+   <typeAlias alias="LogActivity" type="eu.cec.digit.circabc.repo.log.LogActivityDAO"/>
+   <typeAlias alias="LogSearchParameter" type="eu.cec.digit.circabc.repo.log.LogSearchParameterDAO"/>
+   <typeAlias alias="LogSearchLimitParameter" type="eu.cec.digit.circabc.repo.log.LogSearchLimitParameterDAO"/>
+   <typeAlias alias="LogSearchResult" type="eu.cec.digit.circabc.repo.log.LogSearchResultDAO"/>
+   <typeAlias alias="LogCountResult" type="eu.cec.digit.circabc.repo.log.LogCountResultDAO"/>
+   <typeAlias alias="ActivityCount" type="eu.cec.digit.circabc.repo.log.ActivityCountDAO"/>
+
+   <select id="select_log_records" parameterClass="LogSearchParameter" resultClass="LogSearchResult" >
+		 select user_name  as userName ,
+		 cbc_log_activity.service_desc as serviceDescription,
+		 cbc_log_activity.activity_desc as activityDescription,
+		 log_date  as logDate ,
+		 info as  info  ,
+		 path as  path  ,
+		 isok as isOK
+		 from cbc_log , cbc_log_activity
+		 where cbc_log.activity_id = cbc_log_activity.id
+		and ig_id = #igID#
+		and log_date between #fromDate# and #toDate#
+		<dynamic>
+			<isNotNull prepend="AND" property="userName">
+				user_name=#userName#
+			</isNotNull>
+			<isNotNull prepend="AND" property="serviceDescription">
+				cbc_log_activity.service_desc = #serviceDescription#
+			</isNotNull>
+			<isNotNull prepend="AND" property="activityDescription">
+				cbc_log_activity.activity_desc= #activityDescription#
+			</isNotNull>
+		</dynamic>
+		order by log_date desc
+   </select>
+
+   <select id="select_item_history" parameterClass="Long" resultClass="LogSearchResult" >
+		 select user_name  as userName ,
+		 cbc_log_activity.service_desc as serviceDescription,
+		 cbc_log_activity.activity_desc as activityDescription,
+		 log_date  as logDate ,
+		 info as  info  ,
+		 path as  path  ,
+		 isok as isOK
+		 from cbc_log , cbc_log_activity
+		 where cbc_log.activity_id = cbc_log_activity.id
+		and document_id = #documentID#
+		order by log_date desc
+   </select>
+
+
+	<select id="select_log_records_count" parameterClass="LogSearchParameter" resultClass="Integer" >
+		 select count(*)
+		 from cbc_log , cbc_log_activity
+		 where cbc_log.activity_id = cbc_log_activity.id
+		and ig_id = #igID#
+		and log_date between #fromDate# and #toDate#
+		<dynamic>
+			<isNotNull prepend="AND" property="userName">
+				user_name=#userName#
+			</isNotNull>
+			<isNotNull prepend="AND" property="serviceDescription">
+				cbc_log_activity.service_desc = #serviceDescription#
+			</isNotNull>
+			<isNotNull prepend="AND" property="activityDescription">
+				cbc_log_activity.activity_desc= #activityDescription#
+			</isNotNull>
+		</dynamic>
+   </select>
+
+   <select id="select_log_records_page" parameterClass="LogSearchLimitParameter" resultClass="LogSearchResult" >
+   SELECT B.userName ,
+		 B.serviceDescription,
+		 B.activityDescription,
+		 B.logDate ,
+		 B.info  ,
+		 B.path  ,
+		 B.isOK
+   		FROM
+   		 (SELECT rownum row_id ,A.* FROM
+		 (select user_name  as userName ,
+		 cbc_log_activity.service_desc as serviceDescription,
+		 cbc_log_activity.activity_desc as activityDescription,
+		 log_date  as logDate ,
+		 info as  info  ,
+		 path as  path  ,
+		 isok as isOK
+		 from cbc_log , cbc_log_activity
+		 where cbc_log.activity_id = cbc_log_activity.id
+		and ig_id = #igID#
+		and log_date between #fromDate# and #toDate#
+		<dynamic>
+			<isNotNull prepend="AND" property="userName">
+				user_name=#userName#
+			</isNotNull>
+			<isNotNull prepend="AND" property="serviceDescription">
+				cbc_log_activity.service_desc = #serviceDescription#
+			</isNotNull>
+			<isNotNull prepend="AND" property="activityDescription">
+				cbc_log_activity.activity_desc= #activityDescription#
+			</isNotNull>
+		</dynamic>
+		order by log_date desc ) A
+		) B
+		WHERE B.row_id > #startRecord#
+		AND B.row_id <![CDATA[<]]>= #startRecord# + #pageSize#
+   </select>
+
+
+   <select id="select_log_activity"  resultClass="LogActivity">
+      <![CDATA[
+      select
+         id as id,
+         service_desc as serviceDescription ,
+         activity_desc as activityDescription
+      from
+         cbc_log_activity
+      ]]>
+   </select>
+
+   <insert id="insert_log_record" parameterClass="LogRecord">
+   	  <selectKey resultClass="long" keyProperty="id" type="pre">
+   		select cbc_log_seq.nextval as value from dual
+	  </selectKey>
+      insert into cbc_log (id,ig_id,document_id,user_name,log_date,activity_id,ig_name,info,path,isok)
+      values (#id#,#igID#,#documentID#,#user#,#date#,#activityID#,#igName#,#info#,#path#,#isOK#)
+   </insert>
+
+   <select id="select_activity_id" resultClass="integer" parameterClass="LogActivity">
+      select *
+      from cbc_log_activity
+      where service_desc = #serviceDescription# and  activity_desc=#activityDescription#
+   </select>
+
+
+   <insert id="insert_activity" parameterClass="LogActivity">
+   	  <selectKey resultClass="integer" keyProperty="id" type="pre">
+   		select cbc_log_activity_seq.nextval as value from dual
+	  </selectKey>
+      insert into cbc_log_activity (id,service_desc,activity_desc)
+      values (#id#,#serviceDescription#,#activityDescription#)
+   </insert>
+   
+   
+   <delete id="delete_log_by_ig" parameterClass="Long" >
+      delete from  cbc_log where ig_id = #igID#
+   </delete>
+   
+   <select id="select_count_login" resultClass="Integer">
+   	  select count(*)
+      from cbc_log
+      where activity_id = (select id from cbc_log_activity where service_desc='Directory' and activity_desc='Login');
+   </select>
+   
+   <select id="select_last_login_date_of_user" resultClass="Date" parameterClass="String">
+   		select max(log_date) as last_login_date 
+   		from cbc_log 
+   		where user_name=#username# 
+   		and activity_id= (select cbc_log_activity.id from cbc_log_activity where activity_desc='Login')
+   </select>
+   
+   <select id="select_count_actions_per_hour_yesterday" resultClass="LogCountResult">
+   		select to_char(log_date, 'HH24') as hourPeriod, count(*) as numberOfActions
+		from cbc_log
+		where log_date &gt;=  to_date(to_char(sysdate - 1,'DD MM YYYY'), 'DD MM YYYY') and  log_date &lt; to_date(to_char(sysdate,'DD MM YYYY'), 'DD MM YYYY')
+		group by to_char(log_date, 'HH24')
+		order by 1
+   </select>
+   
+   <select id="select_activity_of_interest_group" parameterClass="Long" resultClass="ActivityCount">
+   		select  to_date(to_char(log_date,'MM YYYY'), 'MM YYYY') as monthActivity, service_desc as service, activity_desc as activity, activity_id as activityId, count(*) as actionNumber
+		from cbc_log, cbc_log_activity
+		where cbc_log.activity_id = cbc_log_activity.id
+		and ig_id=#igID#
+		group by  to_char(log_date,'MM YYYY'), service_desc,  activity_desc, activity_id
+		having activity_id=(select id from cbc_log_activity where activity_desc = 'Download content' and service_desc='Library')
+		or activity_id=(select id from cbc_log_activity where activity_desc = 'Upload document' and service_desc='Library')
+		or activity_id=(select id from cbc_log_activity where activity_desc = 'Create post' and service_desc='Newsgroup')
+		or activity_id=(select id from cbc_log_activity where activity_desc = 'Read post' and service_desc='Newsgroup')
+		or activity_id=(select id from cbc_log_activity where activity_desc = 'Add user and allocate profile' and service_desc='Administration')
+		or activity_id=(select id from cbc_log_activity where activity_desc = 'Remove membership' and service_desc='Administration')
+		order by 1 desc, 2
+   </select>
+   
+</sqlMap>

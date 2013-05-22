@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE sqlMapConfig
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map Config 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-config-2.dtd">
+
+<sqlMapConfig>
+
+
+  <!-- NOTE: although we use iBatis here rather than Hibernate, for consistency we make use of single SQL dialect property (hibernate.dialect) for consistency -->
+  <properties resource="alfresco/extension/domain/circabc-hibernate-cfg.properties" />
+
+  <!-- SQL Map XML files loaded from the classpath -->
+
+  <settings enhancementEnabled="true" useStatementNamespaces="true"/>
+  <!-- note: dialect property is set in properties resource above -->
+  <sqlMap  resource="alfresco/extension/log/${hibernate.dialect}/CircabcLog.xml"/>
+  <sqlMap resource="alfresco/extension/log/${hibernate.dialect}/CircabcLock.xml"/>
+  <sqlMap resource="alfresco/extension/auto/upload/${hibernate.dialect}/CircabcAutoUploadConfiguration.xml"/>
+
+</sqlMapConfig>

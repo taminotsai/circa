@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--+
+    |     Copyright European Community 2013 - Licensed under the EUPL V.1.0
+    |
+    |  		   http://ec.europa.eu/idabc/en/document/6523
+    |
+    +-->
+
+<!DOCTYPE beans PUBLIC '-//SPRING//DTD BEAN//EN' 'http://www.springframework.org/dtd/spring-beans.dtd'>
+<!-- This file declares the Authentication beans (filters) to use by the new authentication subsystems with OSS -->
+<beans>
+	
+	<!-- WebDAV authentication -->
+	
+	<bean id="webDavAuthenticationFilter" class="eu.cec.digit.circabc.web.servlet.CircabcWebdavAuthenticationFilter">
+		<property name="authenticationService">
+			<ref bean="AuthenticationService" />
+		</property>
+		<property name="authenticationComponent">
+			<ref bean="AuthenticationComponent" />
+		</property>
+		<property name="personService">
+			<ref bean="personService" />
+		</property>
+		<property name="nodeService">
+			<ref bean="NodeService" />
+		</property>
+		<property name="transactionService">
+			<ref bean="TransactionService" />
+		</property>
+	</bean>
+	
+	<!-- OSS authentication -->
+	
+	<bean id="authenticationFilter" class="eu.cec.digit.circabc.web.app.servlet.AuthenticationFilter">
+		<property name="configService">
+		    <ref bean="webClientConfigService" />
+	    </property>
+    </bean>
+	
+	<!-- Authentication service for chaining -->
+	<bean id="localAuthenticationService" class="org.alfresco.repo.security.authentication.MutableAuthenticationServiceImpl">
+		<property name="authenticationDao">
+			<ref bean="authenticationDao" />
+		</property>
+		<property name="ticketComponent">
+			<ref bean="ticketComponent" />
+		</property>
+		<property name="authenticationComponent">
+			<ref bean="authenticationComponent" />
+		</property>
+		<property name="sysAdminParams">
+			<ref bean="sysAdminParams" />
+		</property>
+	</bean>
+	
+	<!-- Authentication component to be used by the OSS subsystem. An authentication component has to be defined to avoid a recursive loop into the 
+	SubsystemChainingAuthenticationComponent -->
+	<bean id="authenticationComponent" class="org.alfresco.repo.security.authentication.AuthenticationComponentImpl" parent="authenticationComponentBase">
+		<property name="authenticationDao">
+			<ref bean="authenticationDao" />
+		</property>
+		<property name="authenticationManager">
+			<ref bean="authenticationManager" />
+		</property>
+		<property name="allowGuestLogin">
+			<value>true</value>
+		</property>
+		<property name="nodeService">
+			<ref bean="nodeService" />
+		</property>
+		<property name="personService">
+			<ref bean="personService" />
+		</property>
+		<property name="transactionService">
+			<ref bean="transactionService" />
+		</property>
+		<!--                                                                  -->
+		<!-- A list of default users with admin rights.                       -->
+		<!--                                                                  -->
+		<!-- If the security framework is case sensitive these values should  -->
+		<!-- be case sensitive user names. If the security framework is not   -->
+		<!-- case sensitive these values should be the lower-case user names. -->
+		<!--                                                                  -->
+		<!-- By default this includes:                                        -->
+		<!--    admin (the user name of default alfresco admin user)          -->
+		<!--    administrator (the windows default admin user)                -->
+		<!--                                                                  -->
+		<!-- This assumes that user names are not case sensitive.             -->
+		<!--                                                                  -->
+		<property name="defaultAdministratorUserNames">
+			<set>
+				<value>admin</value>
+				<value>administrator</value>
+			</set>
+		</property>
+		<!--                                                                  -->
+		<!-- A list of default users acting as guests.                        -->
+		<!--                                                                  -->
+		<!-- By default this includes:                                        -->
+		<!--    guest (the user name of default alfresco guest user)          -->
+		<!--                                                                  -->
+		<!-- This assumes that user names are not case sensitive.             -->
+		<!--                                                                  -->
+		<property name="defaultGuestUserNames">
+			<set>
+				<value>guest</value>
+			</set>
+		</property>
+	</bean>
+	
+</beans>
