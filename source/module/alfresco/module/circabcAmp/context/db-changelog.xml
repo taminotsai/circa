@@ -1,0 +1,310 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
+
+	<!--
+    <preConditions>
+            <dbms type="oracle"/>
+    </preConditions>
+	-->
+    <changeSet id="1" author="Slobodan Filipovic"  dbms="oracle">
+        <createTable tableName="cbc_log">
+            <column name="id" type="bigint" >
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="ig_id" type="bigint">
+                <constraints nullable="true"/>
+            </column>
+			<column name="document_id" type="bigint">
+                <constraints nullable="true"/>
+            </column>
+			<column name="user_name" type="varchar(50)">
+                <constraints nullable="true"/>
+            </column>
+			<column name="log_date" type="date">
+                <constraints nullable="false"/>
+            </column>
+            <column name="activity_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+			<column name="path" type="varchar(4000)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="info" type="varchar(4000)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="isOK" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createTable tableName="cbc_log_activity">
+            <column name="id" type="int" >
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="service_desc" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+			<column name="activity_desc" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseColumnNames="activity_id"
+                                 baseTableName="cbc_log"
+                                 constraintName="cbc_log_act_fk"
+                                 referencedColumnNames="id"
+                                 referencedTableName="cbc_log_activity"/>
+       <addUniqueConstraint tableName="cbc_log_activity"
+   								columnNames="service_desc,activity_desc"
+								constraintName="uk_srv_act"/>
+		<createSequence sequenceName="cbc_log_seq"/>
+		<createSequence sequenceName="cbc_log_activity_seq"/>
+
+		<createIndex tableName="cbc_log" indexName="idx_cbc_log_ig_date">
+		    <column name="ig_id"/>
+		    <column name="log_date"/>
+		</createIndex>
+		<createIndex tableName="cbc_log" indexName="idx_cbc_log_doc_id">
+		    <column name="document_id"/>
+		</createIndex>
+    </changeSet>
+
+	<changeSet id="2" author="Slobodan Filipovic" dbms="oracle">
+            <createTable tableName="cbc_lock">
+			<column name="lock_name" type="varchar(50)">
+                <constraints primaryKey="true" nullable="false"  />
+            </column>
+        </createTable>
+    </changeSet>
+
+	<changeSet id="3" author="Slobodan Filipovic" dbms="oracle">
+		<addColumn tableName="cbc_log">
+		   <column name="ig_name" type="varchar(256)">
+                <constraints nullable="true"/>
+            </column>
+		</addColumn>
+    </changeSet>
+
+
+	<changeSet id="4" author="Slobodan Filipovic" dbms="oracle">
+		<preConditions onFail="CONTINUE">
+            <sqlCheck expectedResult="0">select count(*) from user_indexes where index_name = 'IDX_CBC_LOG_ACTIVITY_ID'</sqlCheck>
+        </preConditions>
+        <comment>create index IDX_CBC_LOG_ACTIVITY_ID  if does not exist </comment>
+		<createIndex tableName="cbc_log" indexName="idx_cbc_log_activity_id">
+		    <column name="activity_id"/>
+		</createIndex>
+    </changeSet>
+    
+    <changeSet id="5" author="Slobodan Filipovic" dbms="oracle">
+		<preConditions onFail="CONTINUE">
+            <sqlCheck expectedResult="0">select count(*) from user_indexes where index_name = 'IDX_CBC_LOG_USER_NAME'</sqlCheck>
+        </preConditions>
+        <comment>create index IDX_CBC_LOG_USER_NAME  if does not exist </comment>
+		<createIndex tableName="cbc_log" indexName="idx_cbc_log_user_name">
+		    <column name="user_name"/>
+		</createIndex>
+    </changeSet>
+    
+    
+	<changeSet id="6" author="Pierre Beauregard" dbms="oracle">
+    	<createTable tableName="auto_upload_config">
+			<column name="id_config" type="int">
+                <constraints nullable="false" primaryKey="true" />
+            </column>
+		   <column name="ig_source" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="file_ref" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="destination_ref" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="ftp_host" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="ftp_port" type="int">
+                <constraints nullable="true"/>
+            </column>
+            <column name="ftp_username" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="ftp_password" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="ftp_path" type="varchar(2000)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="notify" type="int">
+                <constraints nullable="true"/>
+            </column>
+            <column name="auto_extract" type="int">
+                <constraints nullable="true"/>
+            </column>
+             <column name="emails" type="varchar(2000)">
+                <constraints nullable="true"/>
+            </column>
+             <column name="date_restriction" type="varchar(20)">
+                <constraints nullable="true"/>
+            </column>
+             <column name="status" type="int">
+                <constraints nullable="true"/>
+            </column>
+            
+		</createTable>
+		<createSequence sequenceName="auto_upload_config_seq" incrementBy="1" startValue="1" minValue="1"/>
+    </changeSet>
+    
+
+	<changeSet id="10001" author="Slobodan Filipovic" dbms="mysql">
+              <createTable tableName="cbc_log">
+            <column name="id" type="bigint" autoIncrement="true" >
+                <constraints primaryKey="true" nullable="false"  />
+            </column>
+            <column name="ig_id" type="bigint">
+                <constraints nullable="true"/>
+            </column>
+			<column name="document_id" type="bigint">
+                <constraints nullable="true"/>
+            </column>
+			<column name="user_name" type="varchar(50)">
+                <constraints nullable="true"/>
+            </column>
+			<column name="log_date" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="activity_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="path" type="varchar(4000)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="info" type="varchar(4000)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="isOK" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createTable tableName="cbc_log_activity">
+            <column name="id" type="int" autoIncrement="true" >
+                <constraints primaryKey="true" nullable="false"  />
+            </column>
+            <column name="service_desc" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+			<column name="activity_desc" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseColumnNames="activity_id"
+                                 baseTableName="cbc_log"
+                                 constraintName="cbc_log_act_fk"
+                                 referencedColumnNames="id"
+                                 referencedTableName="cbc_log_activity"/>
+       <addUniqueConstraint tableName="cbc_log_activity"
+   								columnNames="service_desc,activity_desc"
+								constraintName="uk_srv_act"/>
+
+	   <createIndex tableName="cbc_log" indexName="idx_cbc_log_ig_date">
+		    <column name="ig_id"/>
+		    <column name="log_date"/>
+		</createIndex>
+		<createIndex tableName="cbc_log" indexName="idx_cbc_log_doc_id">
+		    <column name="document_id"/>
+		</createIndex>
+    </changeSet>
+
+
+	<changeSet id="10002" author="Slobodan Filipovic" dbms="mysql">
+            <createTable tableName="cbc_lock">
+			<column name="lock_name" type="varchar(50)">
+                <constraints primaryKey="true" nullable="false"  />
+            </column>
+        </createTable>
+    </changeSet>
+
+	<changeSet id="10003" author="Slobodan Filipovic" dbms="mysql">
+		<addColumn tableName="cbc_log">
+		   <column name="ig_name" type="varchar(256)">
+                <constraints nullable="true"/>
+            </column>
+		</addColumn>
+    </changeSet>
+    
+    <changeSet id="10004" author="Slobodan Filipovic" dbms="mysql">
+		<createIndex tableName="cbc_log" indexName="idx_cbc_log_activity_id">
+		    <column name="activity_id"/>
+		</createIndex>
+    </changeSet>
+    
+    <changeSet id="10005" author="Slobodan Filipovic" dbms="mysql">
+		<createIndex tableName="cbc_log" indexName="idx_cbc_log_user_name">
+		    <column name="user_name"/>
+		</createIndex>
+    </changeSet>
+    
+    <changeSet id="10006" author="Pierre Beauregard" dbms="mysql">
+    	<preConditions onFail="CONTINUE">
+            <sqlCheck expectedResult="0">
+            SELECT COUNT(*)
+			FROM INFORMATION_SCHEMA.TABLES
+			WHERE table_name='auto_upload_config' AND 
+			TABLE_SCHEMA IN (
+			SELECT DATABASE())
+            </sqlCheck>
+        </preConditions>
+    
+    	    <createTable tableName="auto_upload_config" >
+			<column name="id_config" type="int" autoIncrement="true" >
+               <constraints primaryKey="true" nullable="false"  />
+            </column>
+		   <column name="ig_source" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="file_ref" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="destination_ref" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="ftp_host" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="ftp_port" type="int">
+                <constraints nullable="true"/>
+            </column>
+            <column name="ftp_username" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="ftp_password" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="ftp_path" type="varchar(2000)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="notify" type="int">
+                <constraints nullable="true"/>
+            </column>
+            <column name="auto_extract" type="int">
+                <constraints nullable="true"/>
+            </column>
+             <column name="emails" type="varchar(2000)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="date_restriction" type="varchar(20)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="status" type="int">
+                <constraints nullable="true"/>
+            </column>
+		</createTable>
+    </changeSet>
+    
+</databaseChangeLog>

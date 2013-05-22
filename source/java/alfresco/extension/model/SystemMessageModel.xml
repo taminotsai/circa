@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--+
+    |     Copyright European Community 2011 - Licensed under the EUPL V.1.0
+    |
+    |  		   http://ec.europa.eu/idabc/en/document/6523
+    |
+    +-->
+    
+<model name="sm:systemMessageModel" xmlns="http://www.alfresco.org/model/dictionary/1.0">
+
+  <!-- Optional meta-data about the model -->
+  <description>Circabc System Message Model</description>
+  <author>Markus Kölzer</author>
+  <version>1.0</version>
+
+	<imports>
+		<import uri="http://www.alfresco.org/model/dictionary/1.0" prefix="d" />
+		<import uri="http://www.alfresco.org/model/content/1.0" prefix="cm" />
+		<import uri="http://www.alfresco.org/model/system/1.0" prefix="sys" />
+	</imports>
+
+	<namespaces>
+		<namespace uri="http://www.cc.cec/circabc/model/systemmessage/1.0" prefix="sm" />
+	</namespaces>
+
+	<types>
+		<type name="sm:systemMessage">
+			<title>System Message</title>
+			<parent>sys:base</parent>
+			<properties>
+				<property name="sm:isSytemMessageEnabled">
+					<title>System Message Enabled</title>
+					<type>d:boolean</type>
+				</property>
+				<property name="sm:systemMessageText">
+					<title>System Message Text</title>
+					<type>d:text</type>
+				</property>
+			</properties>
+		</type>
+	</types>
+	 
+</model>

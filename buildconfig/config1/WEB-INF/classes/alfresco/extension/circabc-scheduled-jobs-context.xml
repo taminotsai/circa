@@ -1,0 +1,159 @@
+<?xml version='1.0' encoding='UTF-8'?>
+
+<!--+
+    |     Copyright European Community 2006 - Licensed under the EUPL V.1.0
+    |
+    |  		   http://ec.europa.eu/idabc/en/document/6523
+    |
+    +-->
+
+<!DOCTYPE beans PUBLIC '-//SPRING//DTD BEAN//EN' 'http://www.springframework.org/dtd/spring-beans.dtd'>
+
+<beans>
+
+  <!-- Task scheduler -->
+  <!-- Alfresco Triggers should not appear here - the scheduler should be injected into the trigger definition -->
+  <!-- This bean should not need to apear else where in extension configuration -->
+  <bean id="schedulerFactory" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+      <!-- Property to allow Jobs to be viewed and managed in Javamelody -->
+   	  <property name="exposeSchedulerInRepository" value="true" />
+      <property name="waitForJobsToCompleteOnShutdown">
+          <value>true</value>
+      </property>
+      <property name="configLocation">
+          <value>classpath:alfresco/extension/domain/quartz.properties</value>
+      </property>
+      <property name="schedulerName">
+          <value>DefaultScheduler</value>
+      </property>
+      <!-- Do not auto start the scheduler - this is done at the end of the bootstrap process -->
+      <property name="autoStartup">
+          <value>false</value>
+      </property>
+
+  </bean>
+
+
+
+<!--
+	"0 0 12 * * ?"  	  	Fire at 12pm (noon) every day
+	"0 15 10 ? * *"  	  	Fire at 10:15am every day
+	"0 15 10 * * ?" 	  	Fire at 10:15am every day
+	"0 15 10 * * ? *" 	  	Fire at 10:15am every day
+	"0 15 10 * * ? 2005" 	  	Fire at 10:15am every day during the year 2005
+	"0 * 14 * * ?" 	  	Fire every minute starting at 2pm and ending at 2:59pm, every day
+	"0 0/5 14 * * ?" 	  	Fire every 5 minutes starting at 2pm and ending at 2:55pm, every day
+	"0 0/5 14,18 * * ?" 	  	Fire every 5 minutes starting at 2pm and ending at 2:55pm, AND fire every 5 minutes starting at 6pm and ending at 6:55pm, every day
+	"0 0-5 14 * * ?" 	  	Fire every minute starting at 2pm and ending at 2:05pm, every day
+	"0 10,44 14 ? 3 WED" 	  	Fire at 2:10pm and at 2:44pm every Wednesday in the month of March.
+	"0 15 10 ? * MON-FRI" 	  	Fire at 10:15am every Monday, Tuesday, Wednesday, Thursday and Friday
+	"0 15 10 15 * ?" 	  	Fire at 10:15am on the 15th day of every month
+	"0 15 10 L * ?" 	  	Fire at 10:15am on the last day of every month
+	"0 15 10 ? * 6L" 	  	Fire at 10:15am on the last Friday of every month
+	"0 15 10 ? * 6L" 	  	Fire at 10:15am on the last Friday of every month
+	"0 15 10 ? * 6L 2002-2005" 	  	Fire at 10:15am on every last friday of every month during the years 2002, 2003, 2004 and 2005
+	"0 15 10 ? * 6#3" 	  	Fire at 10:15am on the third Friday of every month
+-->
+
+	<bean id="emailListenersTrigger" class="org.alfresco.util.TriggerBean">
+		<property name="jobDetail">
+			<bean id="emailListenersJobDetail" class="org.springframework.scheduling.quartz.JobDetailBean">
+				<property name="jobClass">
+					<value>eu.cec.digit.circabc.service.event.MeetingResponseListener</value>
+				</property>
+				<property name="jobDataAsMap">
+					<map>
+						<entry key="serviceRegistry">
+							<ref bean="ServiceRegistry" />
+						</entry>
+						<entry key="circabcServiceRegistry">
+							<ref bean="circabcServiceRegistry" />
+						</entry>
+					</map>
+				</property>
+			</bean>
+		</property>
+		<property name="startDelay">
+			<value>60000</value>
+		</property>
+		<property name="repeatInterval">
+			<value>300000</value>
+		</property>
+		<property name="scheduler">
+			<ref bean="schedulerFactory" />
+		</property>
+	</bean>
+
+   <!-- enable DEBUG for 'org.alfresco.repo.cache.EhCacheTracerJob' and enable scheduler property to activate -->
+    <bean id="ehCacheTracerJob" class="org.alfresco.util.TriggerBean">
+        <property name="jobDetail">
+            <bean id="ehCacheTracerJobDetail" class="org.springframework.scheduling.quartz.JobDetailBean">
+                <property name="jobClass">
+                    <value>org.alfresco.repo.cache.EhCacheTracerJob</value>
+                </property>
+            </bean>
+        </property>
+
+        <property name="scheduler">
+            <ref bean="schedulerFactory" />
+        </property>
+
+        <!-- start after an hour and repeat hourly -->
+        <property name="startDelayMinutes">
+            <value>120</value>
+        </property>
+        <property name="repeatIntervalMinutes">
+            <value>240</value>
+        </property>
+    </bean>
+    
+    	<bean id="plannedGlobalStatisticsTrigger" class="org.alfresco.util.CronTriggerBean">
+		<property name="jobDetail">
+			<bean id="plannedGlobalStatisticsJobDetail" class="org.springframework.scheduling.quartz.JobDetailBean">
+				<property name="jobClass">
+					<value>eu.cec.digit.circabc.service.statistics.global.GlobalStatisticsJobListener</value>
+				</property>
+				<property name="jobDataAsMap">
+					<map>
+						<entry key="globalStatisticsService">
+							<ref bean="GlobalStatisticsService" />
+						</entry>
+						<entry key="circabcLockService">
+							<ref bean="circabcLockService" />
+						</entry>
+					</map>
+				</property>
+			</bean>
+		</property>
+		<property name="cronExpression">
+		 <value>0 5 0 * * ?</value>
+        </property>
+		<property name="scheduler">
+			<ref bean="schedulerFactory" />
+		</property>
+	</bean>
+	
+	<bean id="autoUploadFtpTrigger" class="org.alfresco.util.CronTriggerBean">
+		<property name="jobDetail">
+			<bean id="autoUploadFtpJobDetail" class="org.springframework.scheduling.quartz.JobDetailBean">
+				<property name="jobClass">
+					<value>eu.cec.digit.circabc.service.config.auto.upload.AutoUploadJobListener</value>
+				</property>
+				<property name="jobDataAsMap">
+					<map>
+						<entry key="autoUploadManagementService">
+							<ref bean="AutoUploadManagementService" />
+						</entry>
+					</map>
+				</property>
+			</bean>
+		</property>
+		<property name="cronExpression">
+            <value>0 */5 * * * ?</value>
+        </property>
+		<property name="scheduler">
+			<ref bean="schedulerFactory" />
+		</property>
+	</bean>
+	
+</beans>

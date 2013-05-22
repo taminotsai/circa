@@ -1,0 +1,34 @@
+#     Copyright European Community 2006 - Licensed under the EUPL V.1.0
+#  
+#  		   http://ec.europa.eu/idabc/en/document/6523
+#  		   
+
+config1\
+    Folder containing common files used by all buildconfigurations during MAVEN Build !
+ipm\
+    ???
+leo-tomcat\
+    Configuration for deployement on leo with tomcat
+leo-weblogic\
+    Configuration for deployement on leo with weblogic
+localhost\
+    ???
+localhost-tomcat\
+    
+localhost-tomcat-cluster\
+    
+localhost-weblogic\
+    
+localhost-weblogic-cluster\
+    
+new_install\
+prod-cluster\
+taurus\
+taurus-tomcat\
+wlsacc\
+wlsacc-cluster\
+wlsdev3\
+wlsdev3-cluster1\
+wlsdev3-cluster2\
+wlsload1\
+wlsload1-cluster\

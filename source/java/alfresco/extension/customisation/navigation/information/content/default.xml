@@ -1,0 +1,24 @@
+<alfresco-config area="navigation-custom">
+
+    <!--
+        Define all default custom navigation options.
+    -->
+    <config evaluator="string-compare" condition="Custom Navigation Preference">
+       	<preference>
+	    	<rowView>30</rowView>
+	    	<displayActions>true</displayActions>
+	    	<linkDestination>download</linkDestination>
+	    	<viewMode>circa</viewMode>
+			<actionConfig>document_browse_information_wai</actionConfig>
+			<initialSortColumn>title</initialSortColumn>
+			<initialSortDescending>false</initialSortDescending>
+			<columns>
+				<column>title</column>
+				<column>size</column>
+				<column>modified</column>
+			</columns>
+    	</preference>
+	</config>
+</alfresco-config>
+
+

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="CircabcReporting">
+
+  <typeAlias alias="ContentNumberParametersDAO" type="eu.cec.digit.circabc.repo.report.ContentNumberParametersDAO"/>
+
+<!-- This query includes documents + all versions of this documents -->
+  <select id="select_count_documents" resultClass="Integer" parameterClass="ContentNumberParametersDAO">
+   	  	select count(*) 
+		from alf_node_assoc 
+		where source_node_id in 
+		(
+			select child_node_id from alf_child_assoc where child_node_name in 
+				(select uuid from alf_node where type_qname_id = #idContentQname#) 
+			and child_node_name not in 
+				(select uuid from alf_node where type_qname_id = #idCmObjectQname# and node_deleted = 1)
+			and type_qname_id = #idVersionHistoryQname#
+		)
+   </select>
+   
+   <select id="select_qname_content" resultClass="Integer">
+   	  	select id from alf_qname where local_name = 'content' and ns_id = (select id from alf_namespace where uri = 'http://www.alfresco.org/model/content/1.0')
+   </select>
+   
+   <select id="select_qname_cmobject" resultClass="Integer">
+   	  	select id from alf_qname where local_name = 'cmobject'
+   </select>
+   
+   <select id="select_qname_version_history" resultClass="Integer">
+   	  	select id from alf_qname where local_name = 'versionHistory' and ns_id = (select id from alf_namespace where uri = 'http://www.alfresco.org/model/versionstore/2.0')
+   </select>
+   
+</sqlMap>

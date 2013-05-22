@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="source/java"/>
+	<classpathentry kind="src" path="source/web"/>
+	<classpathentry kind="src" output="build/module" path="source/module"/>
+	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/SDK AlfrescoEmbedded"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="source/web/WEB-INF/lib/ipm-ws-client.jar"/>
+	<classpathentry kind="lib" path="source/web/WEB-INF/lib/tomahawk-1.1.9-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="source/web/WEB-INF/lib/tomahawk-sandbox-1.1.9-SNAPSHOT.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Circabc 3rd Party"/>
+	<classpathentry kind="output" path="build/classes"/>
+</classpath>

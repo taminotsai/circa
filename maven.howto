@@ -1,0 +1,143 @@
+#     Copyright European Community 2006 - Licensed under the EUPL V.1.0
+#
+#  		   http://ec.europa.eu/idabc/en/document/6523
+#
+
+# Construit un war qui utilise le profil localhost (autre profil dans le pom, ex: ipm-tomcat)
+# Commande compile, verifie si les sources sont valide, bonne version de alfresco.war
+# Remarque: -o offline mode (utilise le local repository)
+#--> Donc si mise a jour dans le "global repository"
+# supprimer -o pour misea a jour du local repository
+mvn clean package -P localhost-tomcat
+
+# Charge les sources des .jar du projet.
+mvn clean dependency:sources
+
+# installer les lib
+mvn clean package
+
+# Creer un site avec le rapport des checkstyle, ... Rapport complet. [oblgatoire de passer arguments sinon java heap space]
+set MAVEN_OPTS=-Xmx512m
+mvn clean package -P leo-tomcat site:site
+
+# Creer un package avec n'importe quel profile et en créant les fichiers de distribution OSS.
+mvn clean package -P leo-tomcat -Doss.distribute=true
+
+===============================================================================================
+
+Si bug:
+[INFO] ------------------------------------------------------------------------
+[ERROR] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] The skin does not exist: Unable to determine the release version
+
+Try downloading the file manually from the project website.
+
+Then, install it using the command:
+    mvn install:install-file -DgroupId=org.apache.maven.skins -DartifactId=maven-default-skin -Dversion=RELEASE -Dpackaging=jar -Dfile=/path/to/file
+
+
+  org.apache.maven.skins:maven-default-skin:jar:RELEASE
+
+
+[INFO] ------------------------------------------------------------------------
+[INFO] For more information, run Maven with the -e switch
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 20 seconds
+[INFO] Finished at: Wed Jul 18 12:34:29 CEST 2007
+[INFO] Final Memory: 28M/52M
+[INFO] ------------------------------------------------------------------------
+
+copier j:\EGIS\CIRCA\CIRCA DOC\Analysis Technical\Developpement Environnement\01 dev\localRepository.zip\localRepository\org\apache\maven\skins\
+dans d:\dev\circa\env\maven-2.0.5\localRepository\org\apache\maven\
+
+Resultat visible dans
+d:\dev\circa\workspaces\sdk\SDK Circa\target\site\index.html
+
+===============================================================================================
+
+##  Si cette erreur survient:
+
+[INFO] ------------------------------------------------------------------------
+[ERROR] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] The skin does not exist: Unable to determine the release version
+
+Try downloading the file manually from the project website.
+
+Then, install it using the command:
+    mvn install:install-file -DgroupId=org.apache.maven.skins -DartifactId=maven
+-default-skin -Dversion=RELEASE -Dpackaging=jar -Dfile=/path/to/file
+
+Alternatively, if you host your own repository you can deploy the file there:
+    mvn deploy:deploy-file -DgroupId=org.apache.maven.skins -DartifactId=maven-d
+efault-skin -Dversion=RELEASE -Dpackaging=jar -Dfile=/path/to/file -Durl=[url] -
+DrepositoryId=[id]
+
+
+  org.apache.maven.skins:maven-default-skin:jar:RELEASE
+
+
+changer un des fichier xml sous localRepository\org\apache\maven\skins\maven-default-skin
+afin d'y mettre:
+
+<?xml version="1.0" encoding="UTF-8" ?>
+<metadata>
+  <groupId>org.apache.maven.skins</groupId>
+  <artifactId>maven-default-skin</artifactId>
+  <version>1.0</version>
+<versioning>
+  <release>1.0</release>
+<versions>
+  <version>1.0</version>
+  </versions>
+  <lastUpdated>20060507032433</lastUpdated>
+  </versioning>
+  </metadata>
+
+
+Dans ce cas ci seul le fichier maven-metadata-local.xml a été modifié, mais les autres devraient certainement l'être également.
+
+
+<version>1.0</version>
+<versioning>
+  <release>1.0</release>
+<versions>
+  <version>1.0</version>
+  </versions>
+  <lastUpdated>20060507032433</lastUpdated>
+  </versioning>
+
+
+===============================================================================================
+
+  ####### Ajouter une lib Ã  la main ###########
+
+1. Dans le repo
+
+ /usr/local/maven-2.0.5/bin/mvn install:install-file -DgroupId=captcha -DartifactId=jcaptcha-all -Dversion=1.0.RC6 -Dpackaging=jar -Dfile="/usr/local/src/SDK Circa/source/web/WEB-INF/lib/jcaptcha-all-1.0-RC6.jar"
+[INFO] Scanning for projects...
+[INFO] Searching repository for plugin with prefix: 'install'.
+[INFO] ----------------------------------------------------------------------------
+[INFO] Building circaBC mod for alfresco
+[INFO]    task-segment: [install:install-file] (aggregator-style)
+[INFO] ----------------------------------------------------------------------------
+[INFO] [install:install-file]
+[INFO] Installing /usr/local/src/SDK Circa/source/web/WEB-INF/lib/jcaptcha-all-1.0-RC6.jar to /usr/local/maven-2.0.5/localRepository/captcha/jcaptcha-all/1.0.RC6/jcaptcha-all-1.0.RC6.jar
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESSFUL
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 2 seconds
+[INFO] Finished at: Tue Oct 16 10:42:07 CEST 2007
+[INFO] Final Memory: 5M/10M
+[INFO] ------------------------------------------------------------------------
+
+
+2. Dans le pom
+
+    <dependency>
+      <groupId>captcha</groupId>
+      <artifactId>jcaptcha-all</artifactId>
+      <version>1.0.RC6</version>
+      <scope>provided</scope>
+    </dependency>

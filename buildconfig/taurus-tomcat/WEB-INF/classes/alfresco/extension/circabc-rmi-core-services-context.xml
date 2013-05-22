@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE beans PUBLIC '-//SPRING//DTD BEAN//EN' 'http://www.springframework.org/dtd/spring-beans-2.0.dtd'>
+
+<!-- Core and miscellaneous bean definitions -->
+<beans>
+
+    <!-- Change port 50500 to 18118 -->
+    <bean id="shared-properties"
+          class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="ignoreUnresolvablePlaceholders">
+            <value>true</value>
+        </property>
+        <property name="locations">
+            <list>
+                <value>classpath:alfresco/extension/circabc-shared.properties</value>
+            </list>
+        </property>
+    </bean>
+</beans>

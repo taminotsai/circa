@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="AutoUploadConfiguration">
+
+<typeAlias alias="Configuration" type="eu.cec.digit.circabc.repo.config.auto.upload.Configuration"/>
+
+<!-- get all configuration for one interest Group -->
+   <select id="select_all_configurations" parameterClass="String" resultClass="Configuration" >
+		 select id_config as idConfiguration, ig_source as igName, file_ref as fileNodeRef, destination_ref as parentNodeRef, ftp_host as ftpHost, ftp_port as ftpPort, ftp_username as ftpUsername, ftp_password as ftpPassword, ftp_path as ftpPath, notify as jobNotifications, emails, auto_extract as autoExtract, date_restriction as dateRestriction, status as status
+		 from auto_upload_config
+		 where ig_source = #value#
+   </select>
+   
+   <select id="select_all_configurations_all" parameterClass="String" resultClass="Configuration" >
+		 select id_config as idConfiguration, ig_source as igName, file_ref as fileNodeRef, destination_ref as parentNodeRef, ftp_host as ftpHost, ftp_port as ftpPort, ftp_username as ftpUsername, ftp_password as ftpPassword, ftp_path as ftpPath, notify as jobNotifications, emails, auto_extract as autoExtract, date_restriction as dateRestriction, status as status
+		 from auto_upload_config
+   </select>
+   
+   <insert id="insert_configuration" parameterClass="Configuration">
+   		insert into auto_upload_config (id_config, ig_source, file_ref, destination_ref, ftp_host, ftp_port, ftp_username, ftp_password, ftp_path, notify, emails, auto_extract, date_restriction, status)
+   		values (#igName#,#fileNodeRef#,#parentNodeRef#,#ftpHost#,#ftpPort#,#ftpUsername#, #ftpPassword#, #ftpPath#, #jobNotifications#, #emails#, #autoExtract#, #dateRestriction#, #status#)
+   		<selectKey resultClass="int" keyProperty="idConfiguration" >
+         select LAST_INSERT_ID() AS value
+      </selectKey>
+   </insert>
+   
+   <update id="update_configuration" parameterClass="Configuration">
+   		update auto_upload_config set file_ref=#fileNodeRef#, ftp_host=#ftpHost#, ftp_port=#ftpPort#, ftp_username=#ftpUsername#, ftp_password=#ftpPassword#, ftp_path=#ftpPath#, auto_extract=#autoExtract#, notify=#jobNotifications#, emails=#emails#, date_restriction=#dateRestriction#, status=#status#
+   		where id_config=#idConfiguration#
+   </update>
+   
+   <delete id="delete_configuration" parameterClass="Configuration">
+   		delete from auto_upload_config where id_config=#idConfiguration#
+   </delete>
+   
+    <select id="select_configuration_by_id" parameterClass="String" resultClass="Configuration" >
+		 select id_config as idConfiguration, ig_source as igName, file_ref as fileNodeRef, destination_ref as parentNodeRef, ftp_host as ftpHost, ftp_port as ftpPort, ftp_username as ftpUsername, ftp_password as ftpPassword, ftp_path as ftpPath, notify as jobNotifications, emails, auto_extract as autoExtract, date_restriction as dateRestriction, status as status
+		 from auto_upload_config
+		 where id_config = #value#
+   </select>
+   
+    <select id="select_configuration_by_file_ref" parameterClass="String" resultClass="Configuration" >
+		 select id_config as idConfiguration, ig_source as igName, file_ref as fileNodeRef, destination_ref as parentNodeRef, ftp_host as ftpHost, ftp_port as ftpPort, ftp_username as ftpUsername, ftp_password as ftpPassword, ftp_path as ftpPath, notify as jobNotifications, emails, auto_extract as autoExtract, date_restriction as dateRestriction, status as status
+		 from auto_upload_config
+		 where file_ref = #value#
+   </select>
+
+
+</sqlMap>

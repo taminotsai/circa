@@ -1,0 +1,23 @@
+<alfresco-config area="navigation-custom">
+
+    <!--
+        Define all default custom navigation options.
+    -->
+    <config evaluator="string-compare" condition="Custom Navigation Preference">
+       	<preference>
+	    	<rowView>20</rowView>
+	    	<displayActions>true</displayActions>
+	    	<linkDestination>browse</linkDestination>
+	    	<viewMode>circa</viewMode>
+			<actionConfig>newsgroup_browse_forum_actions_wai</actionConfig>
+			<initialSortColumn>titleOrName</initialSortColumn>
+			<initialSortDescending>false</initialSortDescending>
+			<columns>
+				<column>titleOrName</column>
+				<column>description</column>
+			</columns>
+		</preference>
+	</config>
+</alfresco-config>
+
+

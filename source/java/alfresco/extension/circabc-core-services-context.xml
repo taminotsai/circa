@@ -1,0 +1,154 @@
+<?xml version='1.0' encoding='UTF-8'?>
+
+<!--+
+    |     Copyright European Community 2006 - Licensed under the EUPL V.1.0
+    |
+    |  		   http://ec.europa.eu/idabc/en/document/6523
+    |
+    +-->
+<!DOCTYPE beans PUBLIC '-//SPRING//DTD BEAN//EN' 'http://www.springframework.org/dtd/spring-beans.dtd'>
+
+<!-- Core and miscellaneous bean definitions -->
+<beans>
+
+    <!--                    -->
+    <!--  PERSISTENCE       -->
+    <!--                    -->
+
+    <!-- Load runtime-dependent properties (e.g.: alfresco.jmx.dir).     -->
+    <!-- Note:  This bean relies on PropertyPlaceholderConfigurer        -->
+    <!-- load common properties -->
+    <bean id="repository-properties" parent="common-placeholder-configurer">
+        <property name="locations">
+            <list>
+                <!--  Non-overridable version information -->
+                <value>classpath:alfresco/version.properties</value>
+	        	<!-- Override repository properties -->
+                <value>classpath:alfresco/alfresco-global.properties</value>
+<!--                 <value>classpath:alfresco/extension/config/circabc-shared-repository.properties</value> -->
+                <value>classpath:alfresco/extension/config/circabc-repository.properties</value>
+            </list>
+        </property>
+        <property name="properties">
+            <ref bean="global-properties"/>
+        </property>
+        <!--  Do not allow version information to be overriden -->
+        <property name="localOverride">
+            <value>false</value>
+        </property>
+        <property name="systemPropertiesModeName">
+            <value>SYSTEM_PROPERTIES_MODE_NEVER</value>
+        </property>
+        <!-- Order before shared-properties to give you a chance to override its parameters here -->
+        <property name="order">
+            <value>6</value>
+        </property>
+    </bean>
+
+    <!--                               -->
+    <!--  Version Service   -->
+    <!--                               -->
+<!-- 
+Migration 3.1 -> 3.4.6 - 08/12/2011 - Changed the injected properties to reflect the original
+implementation of Alfresco's 3.4.6 VersionService
+ -->
+    <bean id="versionService" class="eu.cec.digit.circabc.repo.version.CustomLabelAwareVersionServiceImpl" init-method="initialise">
+        <property name="nodeService">
+            <ref bean="NodeService" />
+        </property>
+        <property name="dbNodeService">
+            <ref bean="mtAwareNodeService" />
+        </property>
+        <property name="searcher">
+            <ref bean="versionSearchService" />
+        </property>
+        <property name="dictionaryService">
+            <ref bean="dictionaryService" />
+        </property>
+        <property name="policyComponent">
+            <ref bean="policyComponent" />
+        </property>
+        <property name="policyBehaviourFilter">
+            <ref bean="policyBehaviourFilter" />
+        </property>
+        <property name="permissionService">
+            <ref bean="permissionService" />
+        </property>
+        <property name="onlyUseDeprecatedV1">
+            <value>${version.store.onlyUseDeprecatedV1}</value>
+        </property>
+        <property name="versionMigrator">
+            <ref bean="versionMigrator"/>
+        </property>
+    </bean>
+
+    <!-- Added By CIRCABC -->
+    <!-- Person Type Trigger -->
+    <bean id="personType" class="eu.cec.digit.circabc.repo.model.PersonType" init-method="init">
+        <property name="policyComponent">
+            <ref bean="policyComponent" />
+        </property>
+        <property name="userService">
+            <ref bean="UserService" />
+        </property>
+        <property name="validateDuplicateEmail" value="false"/>
+    </bean>
+
+ 	<bean id="clusterNamePropertySetter" class="org.alfresco.config.SystemPropertiesSetterBean" init-method="init">
+        <property name="propertyMap">
+            <map>
+                <entry key="alfresco.cluster.name">
+                    <value>${alfresco.cluster.name}</value>
+                </entry>
+            </map>
+        </property>
+    </bean>
+    
+    <bean id="fileUploadLimit" class="eu.cec.digit.circabc.web.servlet.UploadFileServletConfig" >
+        <property name="maxSizeInMegaBytes" value="100"/>
+    </bean>
+    
+    <bean id="fileUploadLimitMBean" class="eu.cec.digit.circabc.web.servlet.UploadFileServletConfigMBean">
+		<property name="uploadFileServletConfig" ref="fileUploadLimit" />
+	</bean>
+	
+	<bean id="importFileLimit" class="eu.cec.digit.circabc.action.config.ImportConfig" >
+        <property name="maxSizeInMegaBytes" value="20"/>
+    </bean>
+    
+    <bean id="importFileLimitMBean" class="eu.cec.digit.circabc.action.config.ImportConfigMBean">
+		<property name="importConfig" ref="importFileLimit" />
+	</bean>
+	
+	<bean id="bmiJmxExporter" class="org.springframework.jmx.export.MBeanExporter">
+		<property name="assembler" ref="assembler"/>
+		<property name="beans">
+			<map>
+				<entry key="CIRCABC:Name=Configuration,Type=Max File Upload Size" value-ref="fileUploadLimitMBean"/>
+				<entry key="CIRCABC:Name=Configuration,Type=Max File Import Size" value-ref="importFileLimitMBean"/>
+			</map>
+		</property>
+	</bean>
+	
+	<bean id="jmxAttributeSource" class="org.springframework.jmx.export.annotation.AnnotationJmxAttributeSource"/>
+
+	<bean id="assembler" class="org.springframework.jmx.export.assembler.MetadataMBeanInfoAssembler">
+		<property name="attributeSource" ref="jmxAttributeSource"/>
+	</bean>
+	
+    <bean id="indexThreadPoolExecutor" class="org.alfresco.util.ThreadPoolExecutorFactoryBean">
+        <property name="poolName">
+            <value>indexThread</value>
+        </property>
+        <property name="corePoolSize">
+            <value>10</value>
+        </property>
+        <property name="maximumPoolSize">
+            <value>20</value>
+        </property>
+        <property name="threadPriority">
+            <value>5</value>
+        </property>
+    </bean>
+    
+</beans>

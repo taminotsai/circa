@@ -1,0 +1,58 @@
+<?xml version='1.0' encoding='UTF-8'?>
+
+<!--+
+    |     Copyright European Community 2006 - Licensed under the EUPL V.1.0
+    |
+    |          http://ec.europa.eu/idabc/en/document/6523
+    |
+    +-->
+
+<!DOCTYPE beans PUBLIC '-//SPRING//DTD BEAN//EN' 'http://www.springframework.org/dtd/spring-beans-2.0.dtd'>
+
+<beans>
+
+   <bean id="circabcIBatisDataSource" parent="defaultDataSource">
+   		<property name="defaultAutoCommit" >
+         	<value>true</value>
+   		</property>
+   </bean>
+   
+   <bean id="circabcReportingIBatisDataSource" parent="defaultDataSource">
+   		<property name="defaultAutoCommit" >
+        	<value>true</value>
+   		</property>
+   </bean>
+
+   <bean id="circabcSqlMapClient" class="org.springframework.orm.ibatis.SqlMapClientFactoryBean" scope="singleton">
+      <property name="configLocation"><value>classpath:alfresco/extension/circabc-ibatis-SqlMapConfig.xml</value></property>
+      <property name="dataSource" ref="circabcIBatisDataSource"/>
+   </bean>
+   
+    <bean id="circabcReportingSqlMapClient" class="org.springframework.orm.ibatis.SqlMapClientFactoryBean" scope="singleton">
+      <property name="configLocation"><value>classpath:alfresco/extension/circabc-ibatis-reporting-SqlMapConfig.xml</value></property>
+      <property name="dataSource" ref="circabcReportingIBatisDataSource"/>
+   </bean>
+   
+   <bean id="circabcAUConfigurationSqlMapClient" class="org.springframework.orm.ibatis.SqlMapClientFactoryBean" scope="singleton">
+      <property name="configLocation"><value>classpath:alfresco/extension/circabc-ibatis-SqlMapConfig.xml</value></property>
+      <property name="dataSource" ref="circabcIBatisDataSource"/>
+   </bean>
+
+   <bean id="logDaoService" class="eu.cec.digit.circabc.repo.log.ibatis.IBatisLogDaoServiceImpl">
+      <property name="sqlMapClient" ref="circabcSqlMapClient"/>
+   </bean>
+
+   <bean id="lockDaoService" class="eu.cec.digit.circabc.repo.lock.ibatis.IBatisLockDaoServiceImpl">
+      <property name="sqlMapClient" ref="circabcSqlMapClient"/>
+   </bean>
+   
+   <bean id="reportDaoService" class="eu.cec.digit.circabc.repo.report.ReportDaoServiceImpl">
+      <property name="sqlMapClient" ref="circabcReportingSqlMapClient"/>
+   </bean>
+   
+    <bean id="autoUploadConfigurationDaoService" class="eu.cec.digit.circabc.repo.config.auto.upload.AutoUploadConfigurationServiceImpl">
+      <property name="sqlMapClient" ref="circabcAUConfigurationSqlMapClient"/>
+   </bean>
+
+</beans>
+

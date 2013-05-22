@@ -1,0 +1,362 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
+	http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
+	<changeSet id="20001" author="Slobodan Filipovic"  dbms="mysql" runOnChange="true">
+		<preConditions onFail="CONTINUE">
+            <sqlCheck expectedResult="alf_node_properties">show tables like 'alf_node_properties'</sqlCheck>
+        </preConditions>
+        <comment>updates values in tables alf_node_properties </comment>
+		<sql splitStatements="false">
+      	update alf_node_properties
+		set string_value = null
+		where  string_value ='content_ALL_languages'
+    	</sql>
+	</changeSet>
+	<changeSet id="20002" author="Slobodan Filipovic"  dbms="mysql" runOnChange="true">
+		<preConditions onFail="CONTINUE">
+            <sqlCheck expectedResult="alf_qname">show tables like 'alf_qname'</sqlCheck>
+        </preConditions>
+        <comment>Update values in alf_qname for eventAssociation </comment>
+		<sql splitStatements="true" endDelimiter=";">
+			SELECT @ci_ns_2 :=id
+			FROM alf_namespace
+			WHERE uri ='http://www.cc.cec/circabc/model/content/1.0';
+			UPDATE alf_qname SET ns_id = @ci_ns_2
+			WHERE local_name = 'eventAssociation';
+    	</sql>
+	</changeSet>
+	
+	<changeSet id="20003" author="Slobodan Filipovic"  dbms="mysql" runOnChange="true">
+		<preConditions onFail="CONTINUE">
+            <sqlCheck expectedResult="alf_qname">show tables like 'alf_qname'</sqlCheck>
+        </preConditions>
+        <comment>Update values in alf_qname for igKwContainer </comment>
+		<sql splitStatements="true" endDelimiter=";">
+		SELECT @ci_ns_3 :=id
+		FROM alf_namespace
+		WHERE uri ='http://www.cc.cec/circabc/model/content/1.0';
+		UPDATE alf_qname SET ns_id = @ci_ns_3
+		WHERE local_name = 'igKwContainer';
+    	</sql>
+	</changeSet>
+	
+	<changeSet id="20004" author="Slobodan Filipovic"  dbms="mysql" runOnChange="true">
+		<preConditions onFail="CONTINUE">
+            <sqlCheck expectedResult="alf_qname">show tables like 'alf_qname'</sqlCheck>
+        </preConditions>
+        <comment>Update values in alf_qname for igDpContainer </comment>
+		<sql splitStatements="true" endDelimiter=";">
+      	SELECT @ci_ns_4 :=id
+		FROM alf_namespace
+		WHERE uri ='http://www.cc.cec/circabc/model/content/1.0';
+		UPDATE alf_qname SET ns_id = @ci_ns_4
+		WHERE local_name = 'igDpContainer';
+    	</sql>
+	</changeSet>
+		
+	<changeSet id="20005" author="Slobodan Filipovic"  dbms="mysql" runOnChange="true">
+		<preConditions onFail="CONTINUE">
+            <sqlCheck expectedResult="alf_qname">show tables like 'alf_qname'</sqlCheck>
+        </preConditions>
+        <comment>Update values in alf_qname for shareSpaceContainer </comment>
+		<sql splitStatements="true" endDelimiter=";">
+	      	SELECT @ci_ns_5 :=id
+			FROM alf_namespace
+			WHERE uri ='http://www.cc.cec/circabc/model/content/1.0';
+			UPDATE alf_qname SET ns_id = @ci_ns_5
+			WHERE local_name = 'shareSpaceContainer';
+    	</sql>
+	</changeSet>
+		
+	<changeSet id="20006" author="Slobodan Filipovic"  dbms="mysql" runOnChange="true">
+		<preConditions onFail="CONTINUE">
+            <sqlCheck expectedResult="alf_node_properties">show tables like 'alf_node_properties'</sqlCheck>
+            <sqlCheck expectedResult="0">
+            SELECT COUNT(*)
+			FROM alf_qname,
+			alf_namespace
+			WHERE alf_qname.ns_id = alf_namespace.id AND local_name ='content' AND uri = 'http://www.cc.cec/circabc/model/content/1.0'
+			</sqlCheck>
+        </preConditions>
+        <comment>cm:content become ci:content for nodes of type ci:customizationContent</comment>
+		<sql splitStatements="true" endDelimiter=";">
+		SELECT @ci_ns6 := id
+		FROM alf_namespace
+		WHERE uri ='http://www.cc.cec/circabc/model/content/1.0' ;
+		
+		SELECT @cc_qname_id6 := alf_qname.id
+		FROM alf_qname,
+					 alf_namespace
+		WHERE alf_qname.ns_id = alf_namespace.id AND local_name ='customizationContent' AND uri = 'http://www.cc.cec/circabc/model/content/1.0';
+		SELECT @old_qname_id6 := alf_qname.id
+		FROM alf_qname,
+					 alf_namespace
+		WHERE alf_qname.ns_id = alf_namespace.id AND local_name ='content' AND uri = 'http://www.alfresco.org/model/content/1.0';
+		SELECT @new_qname_id6 := MAX(id) + 1 FROM alf_qname;
+		
+		INSERT INTO alf_qname VALUES (@new_qname_id6,0,@ci_ns6,'content');
+		
+		UPDATE alf_node_properties SET qname_id = @new_qname_id6
+		WHERE node_id IN
+					 (
+		SELECT id
+		FROM alf_node
+		WHERE type_qname_id = @cc_qname_id6
+					) AND qname_id = @old_qname_id6 ;
+    	</sql>
+	</changeSet>
+	
+	<changeSet id="20007" author="Slobodan Filipovic"  dbms="mysql" runOnChange="true">
+		<preConditions onFail="CONTINUE">
+            <sqlCheck expectedResult="alf_node_properties">show tables like 'alf_node_properties'</sqlCheck>
+            <sqlCheck expectedResult="1">
+            SELECT COUNT(*)
+			FROM alf_namespace
+			WHERE uri ='http://www.cc.cec/circabc/model/document/1.0'
+            </sqlCheck>
+            <sqlCheck expectedResult="1">
+            SELECT COUNT(*)
+			FROM alf_qname,
+ 			alf_namespace
+			WHERE alf_qname.ns_id = alf_namespace.id AND local_name ='hiddenContent' AND uri = 'http://www.cc.cec/circabc/model/document/1.0';
+            </sqlCheck>
+            <sqlCheck expectedResult="1">
+            SELECT COUNT(*)
+			FROM alf_qname,
+ 			alf_namespace
+			WHERE alf_qname.ns_id = alf_namespace.id AND local_name ='content' AND uri = 'http://www.alfresco.org/model/content/1.0';
+            </sqlCheck>
+        </preConditions>
+        <comment>cm:content become cd:content for nodes of type cd:hiddenContent</comment>
+		<sql splitStatements="true" endDelimiter=";">
+			SELECT @cd_ns7 := id
+			FROM alf_namespace
+			WHERE uri ='http://www.cc.cec/circabc/model/document/1.0' ;
+			SELECT @hc_qname_id7 := alf_qname.id
+			FROM alf_qname,
+			 alf_namespace
+			WHERE alf_qname.ns_id = alf_namespace.id AND local_name ='hiddenContent' AND uri = 'http://www.cc.cec/circabc/model/document/1.0';
+			SELECT @old_qname_id7 := alf_qname.id
+			FROM alf_qname,
+			 alf_namespace
+			WHERE alf_qname.ns_id = alf_namespace.id AND local_name ='content' AND uri = 'http://www.alfresco.org/model/content/1.0';
+			SELECT @new_qname_id7 := MAX(id) + 1
+			FROM alf_qname;
+			INSERT INTO alf_qname VALUES (@new_qname_id7,0,@cd_ns7,'content');
+			UPDATE alf_node_properties SET qname_id = @new_qname_id7
+			WHERE node_id IN
+			 (
+				SELECT id
+				FROM alf_node
+				WHERE type_qname_id = @hc_qname_id7
+			) AND qname_id = @old_qname_id7 ;
+    	</sql>
+	</changeSet>
+	
+	<changeSet id="20008" author="Slobodan Filipovic"  dbms="mysql" runOnChange="true">
+		<preConditions onFail="CONTINUE">
+            <sqlCheck expectedResult="alf_node_properties">show tables like 'alf_node_properties'</sqlCheck>
+			<sqlCheck expectedResult="1">
+            SELECT COUNT(*)
+			FROM alf_namespace
+			WHERE uri ='http://www.cc.cec/circabc/model/events/1.0'
+            </sqlCheck>
+            <sqlCheck expectedResult="1">
+            SELECT COUNT(*)
+			FROM alf_qname,
+			alf_namespace
+			WHERE alf_qname.ns_id = alf_namespace.id AND local_name ='commonProperties' AND uri = 'http://www.cc.cec/circabc/model/events/1.0';
+            </sqlCheck>
+            <sqlCheck expectedResult="0">
+            SELECT COUNT(*) 
+			FROM alf_qname,
+			alf_namespace
+			WHERE alf_qname.ns_id = alf_namespace.id AND local_name ='title' AND uri = 'http://www.cc.cec/circabc/model/events/1.0';
+            </sqlCheck>
+        </preConditions>
+        <comment>cm:title become ce:title for nodes of aspect ce:commonProperties</comment>
+		<sql splitStatements="true" endDelimiter=";">
+				SELECT @ce_ns8 := id  
+				FROM alf_namespace
+				WHERE uri ='http://www.cc.cec/circabc/model/events/1.0' ;
+
+				SELECT @cp_qname_id8 := alf_qname.id 
+				FROM alf_qname,
+			 		alf_namespace
+				WHERE alf_qname.ns_id = alf_namespace.id AND local_name ='commonProperties' AND uri = 'http://www.cc.cec/circabc/model/events/1.0';
+				SELECT @old_qname_id8 := alf_qname.id 
+					FROM alf_qname,
+			 		alf_namespace
+					WHERE alf_qname.ns_id = alf_namespace.id AND local_name ='title' AND uri = 'http://www.alfresco.org/model/content/1.0';
+				SELECT @new_qname_id8 := MAX(id) + 1 
+				FROM alf_qname;
+
+				INSERT INTO alf_qname VALUES (@new_qname_id8,0,@ce_ns8,'title');
+				UPDATE alf_node_properties SET qname_id = @new_qname_id8
+				WHERE node_id IN
+			 	(
+					SELECT node_id
+					FROM alf_node_aspects
+					WHERE qname_id = @cp_qname_id8
+				) AND qname_id = @old_qname_id8 ;
+    	</sql>
+	</changeSet>
+	
+	
+	<changeSet id="20009" author="Slobodan Filipovic"  dbms="mysql" runOnChange="true">
+		<preConditions onFail="CONTINUE">
+            <sqlCheck expectedResult="alf_node_properties">show tables like 'alf_node_properties'</sqlCheck>
+            <sqlCheck expectedResult="1">
+            SELECT COUNT(*)
+			FROM alf_namespace
+			WHERE uri ='http://www.cc.cec/circabc/model/events/1.0' ;
+            </sqlCheck>
+            <sqlCheck expectedResult="1">
+            SELECT COUNT(*)
+			FROM alf_namespace
+			WHERE uri ='http://www.cc.cec/circabc/model/content/1.0' ;
+            </sqlCheck>
+            <sqlCheck expectedResult="1">
+            SELECT COUNT(*)
+			FROM alf_qname,
+			alf_namespace
+			WHERE alf_qname.ns_id = alf_namespace.id AND local_name ='circabcEventRoot' AND uri = 'http://www.cc.cec/circabc/model/content/1.0';
+            </sqlCheck>
+            <sqlCheck expectedResult="0">
+			SELECT COUNT(*)
+			FROM alf_qname,
+			alf_namespace
+			WHERE alf_qname.ns_id = alf_namespace.id AND local_name ='timezone' AND uri = 'http://www.cc.cec/circabc/model/content/1.0';
+            </sqlCheck>
+        </preConditions>
+        <comment>ce:timezone become ci:timezone for nodes of aspect ci:circabcEventRoot</comment>
+		<sql splitStatements="true" endDelimiter=";">
+				SELECT @ce_ns9 := id
+				FROM alf_namespace
+				WHERE uri ='http://www.cc.cec/circabc/model/events/1.0' ;
+				SELECT @ci_ns9 := id
+				FROM alf_namespace
+				WHERE uri ='http://www.cc.cec/circabc/model/content/1.0' ;
+				SELECT @cer_qname_id9 := alf_qname.id
+				FROM alf_qname,
+							 alf_namespace
+				WHERE alf_qname.ns_id = alf_namespace.id AND local_name ='circabcEventRoot' AND uri = 'http://www.cc.cec/circabc/model/content/1.0';
+				SELECT @old_qname_id9 := alf_qname.id
+				FROM alf_qname,
+							 alf_namespace
+				WHERE alf_qname.ns_id = alf_namespace.id AND local_name ='timezone' AND uri = 'http://www.cc.cec/circabc/model/events/1.0';
+				SELECT @new_qname_id9 := MAX(id) + 1
+				FROM alf_qname;
+				INSERT INTO alf_qname VALUES
+							 (@new_qname_id9,0,@ci_ns9,'timezone'
+							);
+				UPDATE alf_node_properties SET qname_id = @new_qname_id9
+				WHERE node_id IN
+							 (
+				SELECT node_id
+				FROM alf_node_aspects
+				WHERE qname_id = @cer_qname_id9
+							) AND qname_id = @old_qname_id9 ;
+				
+    	</sql>
+	</changeSet>
+
+	<changeSet id="20010" author="Slobodan Filipovic"  dbms="mysql" runOnChange="true">
+		<preConditions onFail="CONTINUE">
+            <sqlCheck expectedResult="alf_node_properties">show tables like 'alf_node_properties'</sqlCheck>
+            <sqlCheck expectedResult="1">
+            SELECT COUNT(*) 
+			FROM alf_namespace
+			WHERE uri ='http://www.cc.cec/circabc/model/events/1.0' ;
+            </sqlCheck>
+            <sqlCheck expectedResult="1">
+            SELECT COUNT(*)
+			FROM alf_namespace
+			WHERE uri ='http://www.cc.cec/circabc/model/content/1.0' ;
+            </sqlCheck>
+            <sqlCheck expectedResult="1">
+            SELECT COUNT(*)
+			FROM alf_qname,
+			alf_namespace
+			WHERE alf_qname.ns_id = alf_namespace.id AND local_name ='circabcEventRoot' AND uri = 'http://www.cc.cec/circabc/model/content/1.0';
+            </sqlCheck>
+            <sqlCheck expectedResult="0">
+            SELECT COUNT(*)
+			FROM alf_qname,
+     		alf_namespace
+			WHERE alf_qname.ns_id = alf_namespace.id AND local_name ='weekStartDay' AND uri = 'http://www.cc.cec/circabc/model/content/1.0';
+            </sqlCheck>
+        </preConditions>
+        <comment>ce:weekStartDay become ci:weekStartDay for nodes of aspect ci:circabcEventRoot</comment>
+		<sql splitStatements="true" endDelimiter=";">
+			SELECT @ce_ns10 := id 
+			FROM alf_namespace
+			WHERE uri ='http://www.cc.cec/circabc/model/events/1.0' ;
+			
+			SELECT @ci_ns10 := id 
+			FROM alf_namespace
+			WHERE uri ='http://www.cc.cec/circabc/model/content/1.0' ;
+			SELECT @cer_qname_id10 := alf_qname.id 
+			FROM alf_qname,
+						 alf_namespace
+			WHERE alf_qname.ns_id = alf_namespace.id AND local_name ='circabcEventRoot' AND uri = 'http://www.cc.cec/circabc/model/content/1.0';
+			SELECT @old_qname_id10 :=  alf_qname.id 
+			FROM alf_qname,
+						 alf_namespace
+			WHERE alf_qname.ns_id = alf_namespace.id AND local_name ='weekStartDay' AND uri = 'http://www.cc.cec/circabc/model/events/1.0';
+			SELECT @new_qname_id10 := MAX(id) + 1 
+			FROM alf_qname;
+			INSERT INTO alf_qname VALUES
+						 (@new_qname_id10,0,@ci_ns10,'weekStartDay'
+						);
+			UPDATE alf_node_properties SET qname_id = @new_qname_id10
+			WHERE node_id IN
+						 (
+			SELECT node_id
+			FROM alf_node_aspects
+			WHERE qname_id = @cer_qname_id10
+						) AND qname_id = @old_qname_id10 ;
+			
+    	</sql>
+	</changeSet>
+	
+	
+	<changeSet id="20011" author="Slobodan Filipovic"  dbms="mysql" runOnChange="true">
+		<preConditions onFail="CONTINUE">
+            <sqlCheck expectedResult="alf_node_properties">show tables like 'alf_node_properties'</sqlCheck>
+        </preConditions>
+        <comment>fix 100 characters local name</comment>
+		<sql splitStatements="true" endDelimiter=";">
+			UPDATE ALF_NODE_PROPERTIES SET STRING_VALUE = SUBSTR(REVERSE(STRING_VALUE),1,94)
+			WHERE QNAME_ID IN
+							(
+			SELECT id
+			FROM alf_qname
+			WHERE local_name IN ('circaCategoryMasterGroup', 'circaCategoryInvitedUsersGroup', 'circaCategorySubsGroup', 'circaIGRootMasterGroup', 'circaIGRootInvitedUsersGroup', 'circaIGRootSubsGroup') UNION
+			SELECT id
+			FROM alf_qname
+			WHERE local_name = 'authorityDisplayName' AND ns_id IN
+			 (
+			SELECT id
+			FROM alf_namespace
+			WHERE uri ='http://www.alfresco.org/model/user/1.0'
+			)
+			
+							) AND LENGTH(STRING_VALUE) >94;
+			UPDATE ALF_NODE_PROPERTIES SET STRING_VALUE = 'GROUP_' || SUBSTR(REVERSE(SUBSTR(STRING_VALUE,7, LENGTH(STRING_VALUE))),1,94)
+			WHERE QNAME_ID IN 
+			(
+			SELECT id
+			FROM alf_qname
+			WHERE local_name ='authorityName' AND ns_id IN 
+			(
+			SELECT id
+			FROM alf_namespace
+			WHERE uri ='http://www.alfresco.org/model/user/1.0')) AND LENGTH(STRING_VALUE) >100;
+    	</sql>
+	</changeSet>
+</databaseChangeLog>

@@ -1,0 +1,4 @@
+Conditions d'utilisation d'Alfresco au sein de CIRCABC
+
+La société Alfresco autorise l'utilisation de son édition Alfresco Entreprise uniquement si elle est intégrée à l'application CIRCABC et respectant les conditions de la licence publique de l'Union Européenne (EUPL) en version 1.1. 
+Cette condition s'ajoute aux droits et obligations précédemment cités dans la License.
